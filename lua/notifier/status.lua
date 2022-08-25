@@ -29,11 +29,9 @@ function status.create_win()
   end
 end
 
-function status.maybe_delete_win(force)
-  if force or vim.tbl_isempty(status.active) then
-    api.nvim_win_close(status.win_nr, true)
-    status.win_nr = nil
-  end
+function status.delete_win()
+  api.nvim_win_close(status.win_nr, true)
+  status.win_nr = nil
 end
 
 local function adjust_width(src, width)
@@ -71,29 +69,29 @@ function status.redraw()
 
   local config = cfg.get()
 
-  if not vim.tbl_isempty(status.active) then
-    local lines = {}
-    local hl_infos = {}
+  local lines = {}
+  local hl_infos = {}
 
-    -- For each namespace, print the messages
-    for _, nsname in ipairs(config.order) do
-      local msgs = status.active[nsname] or {}
-      if vim.tbl_islist(msgs) then
-        for _,msg in ipairs(msgs) do
-          table.insert(lines, format(nsname, msg.content, config.status_width))
-          table.insert(hl_infos, { name = nsname, dim = msg.dim })
-        end
-      else
-        for name, msg in pairs(msgs) do
-          local rname = string.format("%s:%s", nsname, name)
-          table.insert(lines, format(rname, msg.content, config.status_width))
-          table.insert(hl_infos, { name = rname, dim = msg.dim })
-        end
+  -- For each namespace, print the messages
+  for _, nsname in ipairs(config.order) do
+    local msgs = status.active[nsname] or {}
+    if vim.tbl_islist(msgs) then
+      for _,msg in ipairs(msgs) do
+        table.insert(lines, format(nsname, msg.content, config.status_width))
+        table.insert(hl_infos, { name = nsname, dim = msg.dim })
+      end
+    else
+      for name, msg in pairs(msgs) do
+        local rname = string.format("%s:%s", nsname, name)
+        table.insert(lines, format(rname, msg.content, config.status_width))
+        table.insert(hl_infos, { name = rname, dim = msg.dim })
       end
     end
+  end
 
+
+  if #lines > 0 then
     api.nvim_buf_set_lines(status.buf_nr, 0, -1, false, lines)
-
     -- Then highlight the lines
     for i = 1, #hl_infos do
       local hl_group
@@ -108,7 +106,7 @@ function status.redraw()
 
     api.nvim_win_set_height(status.win_nr, #lines)
   else
-    status.maybe_delete_win()
+    status.delete_win()
   end
 end
 
