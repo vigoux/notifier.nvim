@@ -14,6 +14,11 @@ local function notify(msg, level, opts)
   end
 end
 
+local commands = {
+  Clear = function()
+    status.clear "nvim"
+  end,
+}
 
 return {
   setup = function(user_config)
@@ -21,7 +26,9 @@ return {
 
     vim.notify = notify
 
-    api.nvim_create_user_command("NotifierClear", function() status.clear "nvim" end, {})
+    for cname, func in pairs(commands) do
+      api.nvim_create_user_command(config.NS_NAME .. cname, func, {})
+    end
 
     api.nvim_create_autocmd({ "User" }, {
       group = config.NS_NAME,
