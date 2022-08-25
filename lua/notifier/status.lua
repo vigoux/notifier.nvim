@@ -126,7 +126,7 @@ function status.push(namespace, content, dim, title)
   else
     table.insert(status.active[namespace], { content = content, dim = dim })
   end
-  vim.schedule(status.redraw)
+  status.redraw()
 end
 
 function status.pop(namespace, title)
@@ -137,7 +137,7 @@ function status.pop(namespace, title)
   else
     table.remove(status.active[namespace])
   end
-  vim.schedule(status.redraw)
+  status.redraw()
 end
 
 function status.handle(msg)
