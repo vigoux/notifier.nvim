@@ -73,7 +73,7 @@ function status.redraw()
 
   if not vim.tbl_isempty(status.active) then
     local lines = {}
-    local title_lines = {}
+    local hl_infos = {}
 
     -- For each namespace, print the messages
     for _, nsname in ipairs(config.order) do
@@ -81,13 +81,13 @@ function status.redraw()
       if vim.tbl_islist(msgs) then
         for _,msg in ipairs(msgs) do
           table.insert(lines, format(nsname, msg.content, config.status_width))
-          table.insert(title_lines, { name = nsname, dim = msg.dim })
+          table.insert(hl_infos, { name = nsname, dim = msg.dim })
         end
       else
         for name, msg in pairs(msgs) do
           local rname = string.format("%s:%s", nsname, name)
           table.insert(lines, format(rname, msg.content, config.status_width))
-          table.insert(title_lines, { name = rname, dim = msg.dim })
+          table.insert(hl_infos, { name = rname, dim = msg.dim })
         end
       end
     end
@@ -95,19 +95,15 @@ function status.redraw()
     api.nvim_buf_set_lines(status.buf_nr, 0, -1, false, lines)
 
     -- Then highlight the lines
-    for i = 1, api.nvim_buf_line_count(status.buf_nr) do
+    for i = 1, #hl_infos do
       local hl_group
-
-      -- Prevents a strange error
-      if not title_lines[i] then break end
-
-      if title_lines[i].dim then
+      if hl_infos[i].dim then
         hl_group = cfg.HL_CONTENT_DIM
       else
         hl_group = cfg.HL_CONTENT
       end
-      api.nvim_buf_add_highlight(status.buf_nr, ns, hl_group, i - 1, 0, config.status_width - #title_lines[i].name - 1)
-      api.nvim_buf_add_highlight(status.buf_nr, ns, cfg.HL_TITLE, i - 1, config.status_width - #title_lines[i].name, -1)
+      api.nvim_buf_add_highlight(status.buf_nr, ns, hl_group, i - 1, 0, config.status_width - #hl_infos[i].name - 1)
+      api.nvim_buf_add_highlight(status.buf_nr, ns, cfg.HL_TITLE, i - 1, config.status_width - #hl_infos[i].name, -1)
     end
 
     api.nvim_win_set_height(status.win_nr, #lines)
