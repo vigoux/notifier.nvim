@@ -1,5 +1,7 @@
 # `notifier.nvim` non-intrusive notification system for neovim
 
+![Showcase](https://user-images.githubusercontent.com/39092278/186714682-f51ea665-6fca-4442-bad8-8cc7fda2f138.gif)
+
 ## Setup
 
 Using `packer.nvim`:
