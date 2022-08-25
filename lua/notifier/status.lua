@@ -10,7 +10,9 @@ local status = {
 
 function status.create_win()
   if not status.win_nr then
-    status.buf_nr = api.nvim_create_buf(false, true);
+    if not status.buf_nr then
+      status.buf_nr = api.nvim_create_buf(false, true);
+    end
     status.win_nr = api.nvim_open_win(status.buf_nr, false, {
       focusable = false,
       style = "minimal",
