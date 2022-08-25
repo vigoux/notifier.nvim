@@ -83,8 +83,8 @@ function status.redraw()
 
     -- Then highlight the lines
     for i = 1, api.nvim_buf_line_count(status.buf_nr) do
-      api.nvim_buf_add_highlight(status.buf_nr, ns, "Comment", i - 1, 0, config.status_width - title_lines[i] - 1)
-      api.nvim_buf_add_highlight(status.buf_nr, ns, "Title", i - 1, config.status_width - title_lines[i], -1)
+      api.nvim_buf_add_highlight(status.buf_nr, ns, cfg.HL_CONTENT_DIM, i - 1, 0, config.status_width - title_lines[i] - 1)
+      api.nvim_buf_add_highlight(status.buf_nr, ns, cfg.HL_TITLE, i - 1, config.status_width - title_lines[i], -1)
     end
 
     api.nvim_win_set_height(status.win_nr, #lines)

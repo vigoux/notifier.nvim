@@ -1,9 +1,8 @@
 local api = vim.api
 local status = require "notifier.status"
 local config = require "notifier.config"
-local GROUPNAME = "Notifier"
 
-api.nvim_create_augroup(GROUPNAME, {
+api.nvim_create_augroup(config.NS_NAME, {
   clear = true
 })
 
@@ -12,7 +11,7 @@ return {
     config.update(user_config)
 
     api.nvim_create_autocmd({ "User" }, {
-      group = GROUPNAME,
+      group = config.NS_NAME,
       pattern = "LspProgressUpdate",
       callback = function()
         local new_messages = vim.lsp.util.get_progress_messages()
