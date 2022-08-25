@@ -6,7 +6,8 @@ local config = {
     else
       return math.floor(vim.o.columns / 3)
     end
-  end)()
+  end)(),
+  order = { "lsp" },
 }
 
 local M = {

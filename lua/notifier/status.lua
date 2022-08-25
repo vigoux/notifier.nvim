@@ -47,21 +47,21 @@ local function adjust_width(src, width)
   end
 end
 
-local function format(msg, width)
-  local inner_width = width - #msg.name - 1
+local function format(name, msg, width)
+  local inner_width = width - #name - 1
   local fmt_msg
-  if msg.message then
-    local tmp = string.format("%s (%s)", msg.title, msg.message)
+  if msg.opt then
+    local tmp = string.format("%s (%s)", msg.mandat, msg.opt)
     if #tmp > width then
-      fmt_msg = adjust_width(msg.title, inner_width)
+      fmt_msg = adjust_width(msg.mandat, inner_width)
     else
       fmt_msg = adjust_width(tmp, inner_width)
     end
   else
-    fmt_msg = adjust_width(msg.title, inner_width)
+    fmt_msg = adjust_width(msg.mandat, inner_width)
   end
 
-  return fmt_msg .. " " .. msg.name
+  return fmt_msg .. " " .. name
 end
 
 function status.redraw()
@@ -74,17 +74,29 @@ function status.redraw()
     local title_lines = {}
 
     -- For each lsp, print the message
-    for _, msg in pairs(status.active) do
-      table.insert(lines, format(msg, config.status_width))
-      title_lines[#lines] = #msg.name
+    for _, nsname in ipairs(config.order) do
+      for name, msg in pairs(status.active[nsname] or {}) do
+        table.insert(lines, format(name, msg.content, config.status_width))
+        table.insert(title_lines, { name = name, dim = msg.dim })
+      end
     end
 
     api.nvim_buf_set_lines(status.buf_nr, 0, -1, false, lines)
 
     -- Then highlight the lines
     for i = 1, api.nvim_buf_line_count(status.buf_nr) do
-      api.nvim_buf_add_highlight(status.buf_nr, ns, cfg.HL_CONTENT_DIM, i - 1, 0, config.status_width - title_lines[i] - 1)
-      api.nvim_buf_add_highlight(status.buf_nr, ns, cfg.HL_TITLE, i - 1, config.status_width - title_lines[i], -1)
+      local hl_group
+
+      -- Prevents a strange error
+      if not title_lines[i] then break end
+
+      if title_lines[i].dim then
+        hl_group = cfg.HL_CONTENT_DIM
+      else
+        hl_group = cfg.HL_CONTENT
+      end
+      api.nvim_buf_add_highlight(status.buf_nr, ns, hl_group, i - 1, 0, config.status_width - #title_lines[i].name - 1)
+      api.nvim_buf_add_highlight(status.buf_nr, ns, cfg.HL_TITLE, i - 1, config.status_width - #title_lines[i].name, -1)
     end
 
     api.nvim_win_set_height(status.win_nr, #lines)
@@ -93,11 +105,25 @@ function status.redraw()
   end
 end
 
+function status.push(namespace, title, content, dim)
+  if not status.active[namespace] then
+    status.active[namespace] = {}
+  end
+
+  status.active[namespace][title] = { content = content, dim = dim }
+end
+
+function status.clear(namespace, title)
+  if status.active[namespace] then
+    status.active[namespace][title] = nil
+  end
+end
+
 function status.handle(msg)
   if msg.done then
-    status.active[msg.name] = nil
+    status.clear("lsp", msg.name)
   else
-    status.active[msg.name] = msg
+    status.push("lsp", msg.name, { mandat = msg.title, opt = msg.message }, true)
   end
   vim.schedule(status.redraw)
 end
