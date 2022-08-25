@@ -27,3 +27,9 @@ The default configuration is:
   status_width = something, -- COmputed using 'columns' and 'textwidth'
 }
 ```
+
+## Acknoledgement
+
+Heavily inspired by [fidget.nvim]
+
+[fidget.nvim]: https://github.com/j-hui/fidget.nvim
