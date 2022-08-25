@@ -1,12 +1,5 @@
 # `notifier.nvim` non-intrusive notification system for neovim
 
-_This is still very WIP_
-
-TODO:
-- [x] Handle LSP progress
-- [x] Hook into `vim.notify` and friends
-  - [ ] Allow to customize log levels
-
 ## Setup
 
 Using `packer.nvim`:
@@ -42,3 +35,10 @@ doing:
 Heavily inspired by [fidget.nvim]
 
 [fidget.nvim]: https://github.com/j-hui/fidget.nvim
+
+## TODO
+
+- [x] Handle LSP progress
+- [x] Hook into `vim.notify` and friends
+  - [ ] Allow to customize log levels
+
