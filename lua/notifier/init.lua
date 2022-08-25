@@ -6,8 +6,13 @@ api.nvim_create_augroup(config.NS_NAME, {
   clear = true
 })
 
-local function notify(msg, level, opts)
+local notify_msg_cache = {}
+
+local function notify(msg, level, opts, no_cache)
   status.push("nvim", msg)
+  if not no_cache then
+    table.insert(notify_msg_cache,  { msg = msg, level = level })
+  end
   local lifetime = config.get().notify_clear_time
   if lifetime > 0 then
     vim.defer_fn(function() status.pop "nvim" end, lifetime)
@@ -18,6 +23,11 @@ local commands = {
   Clear = function()
     status.clear "nvim"
   end,
+  Replay = function()
+    for _, msg in ipairs(notify_msg_cache) do
+      notify(msg.msg, msg.level, {}, true)
+    end
+  end
 }
 
 return {

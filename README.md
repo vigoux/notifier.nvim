@@ -24,10 +24,10 @@ The default configuration is:
 }
 ```
 
-You can clear the notifications provided through `vim.notify` by
-doing:
+This plugin provides some commands:
 ```vim
-:NotifierClear
+:NotifierClear   " Clear the vim.notify items
+:NotifierReplay  " Replay all notifications
 ```
 
 This plugin defines multiple highlight groups that you can configure:
