@@ -30,6 +30,11 @@ doing:
 :NotifierClear
 ```
 
+This plugin defines multiple highlight groups that you can configure:
+- `NotifierTitle`: the title of the notification (`lsp:..` and `nvim`)
+- `NotifierContent`: the content of the notification
+- `NotifierContentDim`: dimmed content of the notification
+
 ## Acknoledgement
 
 Heavily inspired by [fidget.nvim]
