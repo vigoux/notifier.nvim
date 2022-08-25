@@ -75,11 +75,20 @@ function status.redraw()
     local lines = {}
     local title_lines = {}
 
-    -- For each lsp, print the message
+    -- For each namespace, print the messages
     for _, nsname in ipairs(config.order) do
-      for name, msg in pairs(status.active[nsname] or {}) do
-        table.insert(lines, format(name, msg.content, config.status_width))
-        table.insert(title_lines, { name = name, dim = msg.dim })
+      local msgs = status.active[nsname] or {}
+      if vim.tbl_islist(msgs) then
+        for _,msg in ipairs(msgs) do
+          table.insert(lines, format(nsname, msg.content, config.status_width))
+          table.insert(title_lines, { name = nsname, dim = msg.dim })
+        end
+      else
+        for name, msg in pairs(msgs) do
+          local rname = string.format("%s:%s", nsname, name)
+          table.insert(lines, format(rname, msg.content, config.status_width))
+          table.insert(title_lines, { name = rname, dim = msg.dim })
+        end
       end
     end
 
@@ -107,27 +116,40 @@ function status.redraw()
   end
 end
 
-function status.push(namespace, title, content, dim)
+function status.push(namespace, content, dim, title)
   if not status.active[namespace] then
     status.active[namespace] = {}
   end
 
-  status.active[namespace][title] = { content = content, dim = dim }
+  if type(content) == "string" then
+    content = { mandat = content }
+  end
+
+  if title then
+    status.active[namespace][title] = { content = content, dim = dim }
+  else
+    table.insert(status.active[namespace], { content = content, dim = dim })
+  end
+  vim.schedule(status.redraw)
 end
 
-function status.clear(namespace, title)
-  if status.active[namespace] then
+function status.pop(namespace, title)
+  if not status.active[namespace] then return end
+
+  if title then
     status.active[namespace][title] = nil
+  else
+    table.remove(status.active[namespace])
   end
+  vim.schedule(status.redraw)
 end
 
 function status.handle(msg)
   if msg.done then
-    status.clear("lsp", msg.name)
+    status.pop("lsp", msg.name)
   else
-    status.push("lsp", msg.name, { mandat = msg.title, opt = msg.message }, true)
+    status.push("lsp", { mandat = msg.title, opt = msg.message }, true, msg.name)
   end
-  vim.schedule(status.redraw)
 end
 
 return status

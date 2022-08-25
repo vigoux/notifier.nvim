@@ -7,7 +7,8 @@ local config = {
       return math.floor(vim.o.columns / 3)
     end
   end)(),
-  order = { "lsp" },
+  order = { "nvim", "lsp" },
+  notify_clear_time = 1000,
 }
 
 local M = {

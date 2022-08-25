@@ -4,7 +4,8 @@ _This is still very WIP_
 
 TODO:
 - [x] Handle LSP progress
-- [ ] Hook into `vim.notify` and friends
+- [x] Hook into `vim.notify` and friends
+  - [ ] Allow to customize log levels
 
 ## Setup
 
@@ -25,6 +26,8 @@ The default configuration is:
 {
   ignore_messages = {}, -- Ignore message from LSP servers with this name
   status_width = something, -- COmputed using 'columns' and 'textwidth'
+  order = { "nvim", "lsp" }, -- Order of the components to draw (first nvim notifications, then lsp
+  notify_clear_time = 1000, -- Time in milisecond before removing a vim.notifiy notification
 }
 ```
 
