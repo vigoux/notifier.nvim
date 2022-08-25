@@ -72,17 +72,17 @@ function status.redraw()
   local lines = {}
   local hl_infos = {}
 
-  -- For each namespace, print the messages
-  for _, nsname in ipairs(config.order) do
-    local msgs = status.active[nsname] or {}
+  -- For each component, print the messages
+  for _, compname in ipairs(config.order) do
+    local msgs = status.active[compname] or {}
     if vim.tbl_islist(msgs) then
       for _,msg in ipairs(msgs) do
-        table.insert(lines, format(nsname, msg.content, config.status_width))
-        table.insert(hl_infos, { name = nsname, dim = msg.dim })
+        table.insert(lines, format(compname, msg.content, config.status_width))
+        table.insert(hl_infos, { name = compname, dim = msg.dim })
       end
     else
       for name, msg in pairs(msgs) do
-        local rname = string.format("%s:%s", nsname, name)
+        local rname = string.format("%s:%s", compname, name)
         table.insert(lines, format(rname, msg.content, config.status_width))
         table.insert(hl_infos, { name = rname, dim = msg.dim })
       end
@@ -110,9 +110,9 @@ function status.redraw()
   end
 end
 
-function status.push(namespace, content, dim, title)
-  if not status.active[namespace] then
-    status.active[namespace] = {}
+function status.push(component, content, dim, title)
+  if not status.active[component] then
+    status.active[component] = {}
   end
 
   if type(content) == "string" then
@@ -120,27 +120,26 @@ function status.push(namespace, content, dim, title)
   end
 
   if title then
-    status.active[namespace][title] = { content = content, dim = dim }
+    status.active[component][title] = { content = content, dim = dim }
   else
-    table.insert(status.active[namespace], { content = content, dim = dim })
+    table.insert(status.active[component], { content = content, dim = dim })
   end
   status.redraw()
 end
 
-function status.pop(namespace, title)
-  if not status.active[namespace] then return end
+function status.pop(component, title)
+  if not status.active[component] then return end
 
   if title then
-    status.active[namespace][title] = nil
+    status.active[component][title] = nil
   else
-    table.remove(status.active[namespace])
+    table.remove(status.active[component])
   end
   status.redraw()
 end
 
-function status.clear(namespace)
-  status.active[namespace] = nil
-  status.redraw()
+function status.clear(component)
+  status.active[component] = nil
 end
 
 function status.handle(msg)
