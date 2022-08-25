@@ -138,6 +138,11 @@ function status.pop(namespace, title)
   status.redraw()
 end
 
+function status.clear(namespace)
+  status.active[namespace] = nil
+  status.redraw()
+end
+
 function status.handle(msg)
   if msg.done then
     status.pop("lsp", msg.name)

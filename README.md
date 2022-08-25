@@ -27,8 +27,14 @@ The default configuration is:
   ignore_messages = {}, -- Ignore message from LSP servers with this name
   status_width = something, -- COmputed using 'columns' and 'textwidth'
   order = { "nvim", "lsp" }, -- Order of the components to draw (first nvim notifications, then lsp
-  notify_clear_time = 1000, -- Time in milisecond before removing a vim.notifiy notification
+  notify_clear_time = 1000, -- Time in milisecond before removing a vim.notifiy notification, 0 to make them sticky
 }
+```
+
+You can clear the notifications provided through `vim.notify` by
+doing:
+```vim
+:NotifierClear
 ```
 
 ## Acknoledgement

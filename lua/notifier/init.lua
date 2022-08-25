@@ -8,7 +8,10 @@ api.nvim_create_augroup(config.NS_NAME, {
 
 local function notify(msg, level, opts)
   status.push("nvim", msg)
-  vim.defer_fn(function() status.pop "nvim" end, config.get().notify_clear_time)
+  local lifetime = config.get().notify_clear_time
+  if lifetime > 0 then
+    vim.defer_fn(function() status.pop "nvim" end, lifetime)
+  end
 end
 
 
@@ -17,6 +20,8 @@ return {
     config.update(user_config)
 
     vim.notify = notify
+
+    api.nvim_create_user_command("NotifierClear", function() status.clear "nvim" end, {})
 
     api.nvim_create_autocmd({ "User" }, {
       group = config.NS_NAME,
