@@ -9,6 +9,7 @@ local config = {
   end)(),
   order = { "nvim", "lsp" },
   notify_clear_time = 1000,
+  component_name_recall = false,
 }
 
 local M = {

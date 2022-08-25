@@ -82,7 +82,12 @@ function status.redraw()
       end
     else
       for name, msg in pairs(msgs) do
-        local rname = string.format("%s:%s", compname, name)
+        local rname
+        if config.component_name_recall then
+          rname = string.format("%s:%s", compname, name)
+        else
+          rname = name
+        end
         table.insert(lines, format(rname, msg.content, config.status_width))
         table.insert(hl_infos, { name = rname, dim = msg.dim })
       end

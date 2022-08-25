@@ -23,6 +23,7 @@ The default configuration is:
   status_width = something, -- COmputed using 'columns' and 'textwidth'
   order = { "nvim", "lsp" }, -- Order of the components to draw (first nvim notifications, then lsp
   notify_clear_time = 1000, -- Time in milisecond before removing a vim.notifiy notification, 0 to make them sticky
+  component_name_recall = false -- Whether to prefix the title of the notification by the component name
 }
 ```
 
