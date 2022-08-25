@@ -140,6 +140,7 @@ end
 
 function status.clear(component)
   status.active[component] = nil
+  status.redraw()
 end
 
 function status.handle(msg)
