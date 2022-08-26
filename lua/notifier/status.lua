@@ -1,158 +1,182 @@
 local api = vim.api
-local cfg = require"notifier.config"
-local ns = api.nvim_create_namespace "notifier"
+local cfg = require("notifier.config")
 
-local status = {
-  buf_nr = nil,
-  win_nr = nil,
-  active = {}
-}
 
-function status.create_win()
-  if not status.win_nr then
-    if not status.buf_nr then
-      status.buf_nr = api.nvim_create_buf(false, true);
-    end
-    status.win_nr = api.nvim_open_win(status.buf_nr, false, {
-      focusable = false,
-      style = "minimal",
-      border = "none",
-      noautocmd = true,
-      relative = "editor",
-      anchor = "SE",
-      width = cfg.get().status_width,
-      height = 3,
-      row = vim.o.lines - vim.o.cmdheight - 1,
-      col = vim.o.columns,
-      zindex = 10,
-    })
-  end
+
+
+
+
+
+
+
+
+local StatusModule = {}
+
+
+
+
+
+
+
+
+
+
+
+
+StatusModule.buf_nr = nil
+StatusModule.win_nr = nil
+StatusModule.active = {}
+
+function StatusModule._create_win()
+   if not StatusModule.win_nr then
+      if not StatusModule.buf_nr then
+         StatusModule.buf_nr = api.nvim_create_buf(false, true);
+      end
+      StatusModule.win_nr = api.nvim_open_win(StatusModule.buf_nr, false, {
+         focusable = false,
+         style = "minimal",
+         border = "none",
+         noautocmd = true,
+         relative = "editor",
+         anchor = "SE",
+         width = cfg.config.status_width,
+         height = 3,
+         row = vim.o.lines - vim.o.cmdheight - 1,
+         col = vim.o.columns,
+         zindex = 10,
+      })
+   end
 end
 
-function status.delete_win()
-  api.nvim_win_close(status.win_nr, true)
-  status.win_nr = nil
+function StatusModule._delete_win()
+   api.nvim_win_close(StatusModule.win_nr, true)
+   StatusModule.win_nr = nil
 end
 
 local function adjust_width(src, width)
-  if #src > width then
-    return string.sub(src, 1, width - 3) .. "..."
-  else
-    local acc = src
-    while #acc < width do
-      acc = " " .. acc
-    end
+   if #src > width then
+      return string.sub(src, 1, width - 3) .. "..."
+   else
+      local acc = src
+      while #acc < width do
+         acc = " " .. acc
+      end
 
-    return acc
-  end
+      return acc
+   end
 end
 
 local function format(name, msg, width)
-  local inner_width = width - #name - 1
-  local fmt_msg
-  if msg.opt then
-    local tmp = string.format("%s (%s)", msg.mandat, msg.opt)
-    if #tmp > inner_width then
-      fmt_msg = adjust_width(msg.mandat, inner_width)
-    else
-      fmt_msg = adjust_width(tmp, inner_width)
-    end
-  else
-    fmt_msg = adjust_width(msg.mandat, inner_width)
-  end
-
-  return fmt_msg .. " " .. name
-end
-
-function status.redraw()
-  status.create_win()
-
-  local config = cfg.get()
-
-  local lines = {}
-  local hl_infos = {}
-  local function push_line(title, content, dim)
-    table.insert(lines, format(title, content, config.status_width))
-    table.insert(hl_infos, { name = title, dim = dim })
-  end
-
-  -- For each component, print the messages
-  for _, compname in ipairs(config.order) do
-    local msgs = status.active[compname] or {}
-    local is_tbl = vim.tbl_islist(msgs)
-
-    for name, msg in pairs(msgs) do
-      -- Resolve notification name
-      local rname = msg.content.title or (is_tbl and compname or name)
-
-      if config.component_name_recall and not is_tbl then
-        rname = string.format("%s:%s", compname, rname)
-      end
-
-      push_line(rname, msg.content, msg.dim)
-    end
-  end
-
-
-  if #lines > 0 then
-    api.nvim_buf_set_lines(status.buf_nr, 0, -1, false, lines)
-    -- Then highlight the lines
-    for i = 1, #hl_infos do
-      local hl_group
-      if hl_infos[i].dim then
-        hl_group = cfg.HL_CONTENT_DIM
+   local inner_width = width - #name - 1
+   local fmt_msg
+   if msg.opt then
+      local tmp = string.format("%s (%s)", msg.mandat, msg.opt)
+      if #tmp > inner_width then
+         fmt_msg = adjust_width(msg.mandat, inner_width)
       else
-        hl_group = cfg.HL_CONTENT
+         fmt_msg = adjust_width(tmp, inner_width)
       end
-      api.nvim_buf_add_highlight(status.buf_nr, ns, hl_group, i - 1, 0, config.status_width - #hl_infos[i].name - 1)
-      api.nvim_buf_add_highlight(status.buf_nr, ns, cfg.HL_TITLE, i - 1, config.status_width - #hl_infos[i].name, -1)
-    end
+   else
+      fmt_msg = adjust_width(msg.mandat, inner_width)
+   end
 
-    api.nvim_win_set_height(status.win_nr, #lines)
-  else
-    status.delete_win()
-  end
+   return fmt_msg .. " " .. name
 end
 
-function status.push(component, content, dim, title)
-  if not status.active[component] then
-    status.active[component] = {}
-  end
+function StatusModule.redraw()
+   StatusModule._create_win()
 
-  if type(content) == "string" then
-    content = { mandat = content }
-  end
+   local lines = {}
+   local hl_infos = {}
+   local function push_line(title, content)
+      table.insert(lines, format(title, content, cfg.config.status_width))
+      table.insert(hl_infos, { name = title, dim = content.dim })
+   end
 
-  if title then
-    status.active[component][title] = { content = content, dim = dim }
-  else
-    table.insert(status.active[component], { content = content, dim = dim })
-  end
-  status.redraw()
+
+   for _, compname in ipairs(cfg.config.order) do
+      local msgs = StatusModule.active[compname] or {}
+      local is_tbl = vim.tbl_islist(msgs)
+
+      for name, msg in pairs(msgs) do
+
+         local rname = msg.title
+         if not rname and is_tbl then
+            rname = name
+         elseif not is_tbl then
+            rname = compname
+         end
+
+         if cfg.config.component_name_recall and not is_tbl then
+            rname = string.format("%s:%s", compname, rname)
+         end
+
+         push_line(rname, msg)
+      end
+   end
+
+
+   if #lines > 0 then
+      api.nvim_buf_set_lines(StatusModule.buf_nr, 0, -1, false, lines)
+
+      for i = 1, #hl_infos do
+         local hl_group
+         if hl_infos[i].dim then
+            hl_group = cfg.HL_CONTENT_DIM
+         else
+            hl_group = cfg.HL_CONTENT
+         end
+         api.nvim_buf_add_highlight(StatusModule.buf_nr, cfg.NS_ID, hl_group, i - 1, 0, cfg.config.status_width - #hl_infos[i].name - 1)
+         api.nvim_buf_add_highlight(StatusModule.buf_nr, cfg.NS_ID, cfg.HL_TITLE, i - 1, cfg.config.status_width - #hl_infos[i].name, -1)
+      end
+
+      api.nvim_win_set_height(StatusModule.win_nr, #lines)
+   else
+      StatusModule._delete_win()
+   end
 end
 
-function status.pop(component, title)
-  if not status.active[component] then return end
+function StatusModule.push(component, content, title)
+   if not StatusModule.active[component] then
+      StatusModule.active[component] = {}
+   end
 
-  if title then
-    status.active[component][title] = nil
-  else
-    table.remove(status.active[component])
-  end
-  status.redraw()
+   if type(content) == "string" then
+      content = { mandat = content }
+   end
+
+   content = content
+
+   if title then
+      StatusModule.active[component][title] = content
+   else
+      table.insert(StatusModule.active[component], content)
+   end
+   StatusModule.redraw()
 end
 
-function status.clear(component)
-  status.active[component] = nil
-  status.redraw()
+function StatusModule.pop(component, title)
+   if not StatusModule.active[component] then return end
+
+   if title then
+      StatusModule.active[component][title] = nil
+   else
+      table.remove(StatusModule.active[component])
+   end
+   StatusModule.redraw()
 end
 
-function status.handle(msg)
-  if msg.done then
-    status.pop("lsp", msg.name)
-  else
-    status.push("lsp", { mandat = msg.title, opt = msg.message }, true, msg.name)
-  end
+function StatusModule.clear(component)
+   StatusModule.active[component] = nil
+   StatusModule.redraw()
 end
 
-return status
+function StatusModule.handle(msg)
+   if msg.done then
+      StatusModule.pop("lsp", msg.name)
+   else
+      StatusModule.push("lsp", { mandat = msg.title, opt = msg.message, dim = true }, msg.name)
+   end
+end
+
+return StatusModule

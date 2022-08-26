@@ -1,40 +1,55 @@
-local config = {
-  ignore_messages = {},
-  status_width = (function()
-    if vim.o.textwidth ~= 0 then
-      return math.floor((vim.o.columns - vim.o.textwidth) * 0.7)
-    else
-      return math.floor(vim.o.columns / 3)
-    end
-  end)(),
-  order = { "nvim", "lsp" },
-  notify_clear_time = 1000,
-  component_name_recall = false,
+local ConfigModule = {Config = {}, }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ConfigModule.NS_NAME = "Notifier"
+ConfigModule.NS_ID = vim.api.nvim_create_namespace("notifier")
+
+ConfigModule.config = {
+   ignore_messages = {},
+   status_width = (function()
+      if vim.o.textwidth ~= 0 then
+         return math.floor((vim.o.columns - vim.o.textwidth) * 0.7)
+      else
+         return math.floor(vim.o.columns / 3)
+      end
+   end)(),
+   order = { "nvim", "lsp" },
+   notify_clear_time = 1000,
+   component_name_recall = false,
 }
 
-local M = {
-  NS_ID = vim.api.nvim_create_namespace "notifier",
-  NS_NAME = "Notifier",
-}
-
-function M.get()
-  return config
+function ConfigModule.update(other)
+   ConfigModule.config = vim.tbl_deep_extend("force", ConfigModule.config, other or {})
 end
 
-function M.update(other)
-  config = vim.tbl_deep_extend("force", config, other or {})
+local function hl_group(name)
+   return ConfigModule.NS_NAME .. name
 end
 
-function M.hl_group(name)
-  return M.NS_NAME .. name
-end
+ConfigModule.HL_CONTENT_DIM = hl_group("ContentDim")
+ConfigModule.HL_CONTENT = hl_group("Content")
+ConfigModule.HL_TITLE = hl_group("Title")
 
-M.HL_CONTENT_DIM = M.hl_group "ContentDim"
-M.HL_CONTENT = M.hl_group "Content"
-M.HL_TITLE = M.hl_group "Title"
+vim.api.nvim_set_hl(0, ConfigModule.HL_CONTENT_DIM, { link = "Comment", default = true })
+vim.api.nvim_set_hl(0, ConfigModule.HL_CONTENT, { link = "Normal", default = true })
+vim.api.nvim_set_hl(0, ConfigModule.HL_TITLE, { link = "Title", default = true })
 
-vim.api.nvim_set_hl(0, M.HL_CONTENT_DIM, { link = "Comment", default = true })
-vim.api.nvim_set_hl(0, M.HL_CONTENT, { link = "Normal", default = true })
-vim.api.nvim_set_hl(0, M.HL_TITLE, { link = "Title", default = true })
-
-return M
+return ConfigModule
