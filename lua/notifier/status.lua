@@ -52,7 +52,7 @@ local function format(name, msg, width)
   local fmt_msg
   if msg.opt then
     local tmp = string.format("%s (%s)", msg.mandat, msg.opt)
-    if #tmp > width then
+    if #tmp > inner_width then
       fmt_msg = adjust_width(msg.mandat, inner_width)
     else
       fmt_msg = adjust_width(tmp, inner_width)
