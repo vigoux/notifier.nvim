@@ -1,14 +1,14 @@
 local api = vim.api
 local cfg = require("notifier.config")
 
+local Message = {}
 
 
 
 
 
 
-
-
+local Component = {}
 
 local StatusModule = {}
 
