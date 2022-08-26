@@ -102,9 +102,9 @@ function StatusModule.redraw()
       -- Resolve notification name
       local rname: string = msg.title
       if not rname and is_tbl then
-        rname = name as string -- This is actually a string here, as checks by tbl_islist
-      elseif not is_tbl then
         rname = compname
+      elseif not is_tbl then
+        rname = name as string -- This is actually a string here, as checks by tbl_islist
       end
 
       if cfg.config.component_name_recall and not is_tbl then

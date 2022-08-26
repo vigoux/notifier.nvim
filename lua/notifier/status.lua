@@ -102,9 +102,9 @@ function StatusModule.redraw()
 
          local rname = msg.title
          if not rname and is_tbl then
-            rname = name
-         elseif not is_tbl then
             rname = compname
+         elseif not is_tbl then
+            rname = name
          end
 
          if cfg.config.component_name_recall and not is_tbl then
