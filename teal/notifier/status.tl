@@ -27,6 +27,15 @@ StatusModule.buf_nr = nil
 StatusModule.win_nr = nil
 StatusModule.active = {}
 
+local function get_status_width(): integer
+  local w = cfg.config.status_width
+  if w is function(): integer then
+    return w()
+  else
+    return w
+  end
+end
+
 function StatusModule._create_win()
   if not StatusModule.win_nr then
     if not StatusModule.buf_nr then
@@ -39,7 +48,7 @@ function StatusModule._create_win()
       noautocmd = true,
       relative = "editor",
       anchor = "SE",
-      width = cfg.config.status_width,
+      width = get_status_width(),
       height = 3,
       row = vim.o.lines - vim.o.cmdheight - 1,
       col = vim.o.columns,
@@ -88,8 +97,9 @@ function StatusModule.redraw()
 
   local lines = {}
   local hl_infos = {}
+  local width = get_status_width()
   local function push_line(title: string, content: Message)
-    table.insert(lines, format(title, content, cfg.config.status_width))
+    table.insert(lines, format(title, content, width))
     table.insert(hl_infos, { name = title, dim = content.dim })
   end
 
@@ -117,6 +127,7 @@ function StatusModule.redraw()
 
 
   if #lines > 0 then
+    api.nvim_buf_clear_namespace(StatusModule.buf_nr, cfg.NS_ID, 0, -1)
     api.nvim_buf_set_lines(StatusModule.buf_nr, 0, -1, false, lines)
     -- Then highlight the lines
     for i = 1, #hl_infos do
@@ -126,8 +137,8 @@ function StatusModule.redraw()
       else
         hl_group = cfg.HL_CONTENT
       end
-      api.nvim_buf_add_highlight(StatusModule.buf_nr, cfg.NS_ID, hl_group, i - 1, 0, cfg.config.status_width - #hl_infos[i].name - 1)
-      api.nvim_buf_add_highlight(StatusModule.buf_nr, cfg.NS_ID, cfg.HL_TITLE, i - 1, cfg.config.status_width - #hl_infos[i].name, -1)
+      api.nvim_buf_add_highlight(StatusModule.buf_nr, cfg.NS_ID, hl_group, i - 1, 0, width - #hl_infos[i].name - 1)
+      api.nvim_buf_add_highlight(StatusModule.buf_nr, cfg.NS_ID, cfg.HL_TITLE, i - 1, width - #hl_infos[i].name, -1)
     end
 
     api.nvim_win_set_height(StatusModule.win_nr, #lines)

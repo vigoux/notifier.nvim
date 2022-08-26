@@ -1,7 +1,7 @@
 local record ConfigModule
   record Config
     ignore_messages: {string:boolean}
-    status_width: integer
+    status_width: integer|function():integer
     order: {string}
     notify_clear_time: integer
     component_name_recall: boolean
@@ -24,13 +24,15 @@ ConfigModule.NS_ID = vim.api.nvim_create_namespace "notifier"
 
 ConfigModule.config = {
   ignore_messages = {},
-  status_width = (function(): integer
-    if vim.o.textwidth ~= 0 then
-      return math.floor((vim.o.columns - vim.o.textwidth) * 0.7)
+  status_width = function(): integer
+    local tw = vim.o.textwidth
+    local cols = vim.o.columns
+    if tw > 0 and tw < cols then
+      return math.floor((cols - tw) * 0.7)
     else
-      return math.floor(vim.o.columns / 3)
+      return math.floor(cols / 3)
     end
-  end)(),
+  end,
   order = { "nvim", "lsp" },
   notify_clear_time = 1000,
   component_name_recall = false,

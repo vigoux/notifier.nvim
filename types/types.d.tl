@@ -55,6 +55,7 @@ global record vim
     nvim_create_user_command: function(string, function(), CreateUserCommandOptions)
     nvim_buf_set_lines: function(BufNr, integer, integer, boolean, {string})
     nvim_buf_add_highlight: function(BufNr, integer, string, integer, integer, integer)
+    nvim_buf_clear_namespace: function(BufNr, integer, integer, integer)
     nvim_open_win: function(BufNr, boolean, OpenWinOptions): WinNr
     nvim_win_close: function(WinNr, boolean)
     nvim_win_set_height: function(WinNr, integer)
@@ -83,4 +84,6 @@ global record vim
 
   tbl_deep_extend: function(string, ...: table): table
   tbl_islist: function({any:any}): boolean
+
+  pretty_print: function(any)
 end
