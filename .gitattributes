@@ -1,1 +1,2 @@
-lua/**/*.lua linguist-generated
+*.tl linguist-language=Lua
+lua/** linguist-generated
