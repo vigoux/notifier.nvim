@@ -1,4 +1,8 @@
-local ConfigModule = {Config = {}, }
+local ConfigModule = {Config = {Notify = {}, }, }
+
+
+
+
 
 
 
@@ -34,7 +38,10 @@ ConfigModule.config = {
       end
    end,
    order = { "nvim", "lsp" },
-   notify_clear_time = 1000,
+   notify = {
+      clear_time = 1000,
+      min_level = vim.log.levels.INFO,
+   },
    component_name_recall = false,
 }
 

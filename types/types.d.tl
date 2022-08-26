@@ -64,6 +64,17 @@ global record vim
     nvim_set_hl: function(integer, string, SetHlOptions)
   end
 
+  record log
+    record levels
+      TRACE: integer
+      DEBUG: integer
+      INFO: integer
+      WARN: integer
+      ERROR: integer
+      OFF: integer
+    end
+  end
+
   record lsp
     record ProgressMessage
       name: string

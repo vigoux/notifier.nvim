@@ -13,14 +13,16 @@ api.nvim_create_augroup(config.NS_NAME, {
 local notify_msg_cache = {}
 
 local function notify(msg, level, opts, no_cache)
-   opts = opts or {}
-   status.push("nvim", { mandat = msg, title = opts.title })
-   if not no_cache then
-      table.insert(notify_msg_cache, { msg = msg, level = level, opts = opts })
-   end
-   local lifetime = config.config.notify_clear_time
-   if lifetime > 0 then
-      vim.defer_fn(function() status.pop("nvim") end, lifetime)
+   if level >= config.config.notify.min_level then
+      opts = opts or {}
+      status.push("nvim", { mandat = msg, title = opts.title })
+      if not no_cache then
+         table.insert(notify_msg_cache, { msg = msg, level = level, opts = opts })
+      end
+      local lifetime = config.config.notify.clear_time
+      if lifetime > 0 then
+         vim.defer_fn(function() status.pop("nvim") end, lifetime)
+      end
    end
 end
 

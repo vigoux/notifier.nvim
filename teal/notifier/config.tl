@@ -3,7 +3,11 @@ local record ConfigModule
     ignore_messages: {string:boolean}
     status_width: integer|function():integer
     order: {string}
-    notify_clear_time: integer
+    record Notify
+      clear_time: integer
+      min_level: integer
+    end
+    notify: Notify
     component_name_recall: boolean
   end
 
@@ -34,7 +38,10 @@ ConfigModule.config = {
     end
   end,
   order = { "nvim", "lsp" },
-  notify_clear_time = 1000,
+  notify = {
+    clear_time = 1000,
+    min_level = vim.log.levels.INFO
+  } as ConfigModule.Config.Notify,
   component_name_recall = false,
 }
 
