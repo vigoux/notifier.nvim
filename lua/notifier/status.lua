@@ -137,8 +137,8 @@ function StatusModule.redraw()
          else
             hl_group = cfg.HL_CONTENT
          end
-         api.nvim_buf_add_highlight(StatusModule.buf_nr, cfg.NS_ID, hl_group, i - 1, 0, width - #hl_infos[i].name - 1)
-         api.nvim_buf_add_highlight(StatusModule.buf_nr, cfg.NS_ID, cfg.HL_TITLE, i - 1, width - #hl_infos[i].name, -1)
+         api.nvim_buf_add_highlight(StatusModule.buf_nr, cfg.NS_ID, hl_group, i - 1, 0, #lines[i] - #hl_infos[i].name - 1)
+         api.nvim_buf_add_highlight(StatusModule.buf_nr, cfg.NS_ID, cfg.HL_TITLE, i - 1, #lines[i] - #hl_infos[i].name, -1)
       end
 
       api.nvim_win_set_height(StatusModule.win_nr, #lines)
