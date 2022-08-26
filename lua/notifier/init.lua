@@ -59,5 +59,12 @@ return {
             end
          end,
       })
+
+      api.nvim_create_autocmd("VimResized", {
+         group = config.NS_NAME,
+         callback = function()
+            status._delete_win()
+         end,
+      })
    end,
 }
