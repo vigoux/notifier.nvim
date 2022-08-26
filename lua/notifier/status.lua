@@ -71,26 +71,25 @@ function status.redraw()
 
   local lines = {}
   local hl_infos = {}
+  local function push_line(title, content, dim)
+    table.insert(lines, format(title, content, config.status_width))
+    table.insert(hl_infos, { name = title, dim = dim })
+  end
 
   -- For each component, print the messages
   for _, compname in ipairs(config.order) do
     local msgs = status.active[compname] or {}
-    if vim.tbl_islist(msgs) then
-      for _,msg in ipairs(msgs) do
-        table.insert(lines, format(compname, msg.content, config.status_width))
-        table.insert(hl_infos, { name = compname, dim = msg.dim })
+    local is_tbl = vim.tbl_islist(msgs)
+
+    for name, msg in pairs(msgs) do
+      -- Resolve notification name
+      local rname = msg.content.title or (is_tbl and compname or name)
+
+      if config.component_name_recall and not is_tbl then
+        rname = string.format("%s:%s", compname, rname)
       end
-    else
-      for name, msg in pairs(msgs) do
-        local rname
-        if config.component_name_recall then
-          rname = string.format("%s:%s", compname, name)
-        else
-          rname = name
-        end
-        table.insert(lines, format(rname, msg.content, config.status_width))
-        table.insert(hl_infos, { name = rname, dim = msg.dim })
-      end
+
+      push_line(rname, msg.content, msg.dim)
     end
   end
 
