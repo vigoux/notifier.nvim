@@ -13,6 +13,7 @@ global record vim
     record SetHlOptions
       link: string
       default: boolean
+      bg: string
     end
 
     record OpenWinOptions
@@ -62,6 +63,7 @@ global record vim
     nvim_create_buf: function(boolean, boolean): BufNr
     nvim_create_namespace: function(string): integer
     nvim_set_hl: function(integer, string, SetHlOptions)
+    nvim_win_set_hl_ns: function(integer, integer)
   end
 
   record log

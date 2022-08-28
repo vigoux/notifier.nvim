@@ -54,6 +54,9 @@ function StatusModule._create_win()
       col = vim.o.columns,
       zindex = 10,
     })
+    local winhlns = api.nvim_create_namespace("notifier")
+    api.nvim_win_set_hl_ns(StatusModule.win_nr, winhlns)
+    api.nvim_set_hl(winhlns, "NormalFloat", { bg = "None" })
   end
 end
 
