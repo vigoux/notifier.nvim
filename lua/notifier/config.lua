@@ -57,13 +57,16 @@ end
 
 local function hl_group(name, options)
    local hl_name = ConfigModule.NS_NAME .. name
-   vim.api.nvim_set_hl(ConfigModule.NS_ID, hl_name, options)
+   vim.api.nvim_set_hl(0, hl_name, options)
    return hl_name
 end
+
 
 ConfigModule.HL_CONTENT_DIM = hl_group("ContentDim", { link = "Comment", default = true })
 ConfigModule.HL_CONTENT = hl_group("Content", { link = "Normal", default = true })
 ConfigModule.HL_TITLE = hl_group("Title", { link = "Title", default = true })
+
+
 vim.api.nvim_set_hl(ConfigModule.NS_ID, "NormalFloat", { bg = "bg" })
 
 return ConfigModule
