@@ -9,8 +9,9 @@ local NotifyOptions = {}
 local notify_msg_cache = {}
 
 local function notify(msg, level, opts, no_cache)
+   level = vim.log.levels.INFO
+   opts = opts or {}
    if level >= config.config.notify.min_level then
-      opts = opts or {}
       status.push("nvim", { mandat = msg, title = opts.title })
       if not no_cache then
          table.insert(notify_msg_cache, { msg = msg, level = level, opts = opts })
