@@ -21,7 +21,7 @@ The default configuration is:
 {
   ignore_messages = {}, -- Ignore message from LSP servers with this name
   status_width = something, -- COmputed using 'columns' and 'textwidth'
-  components = {  -- Order of the components to draw (first nvim notifications, then lsp)
+  components = {  -- Order of the components to draw from top to bottom (first nvim notifications, then lsp)
     "nvim",  -- Nvim notifications (vim.notify and such)
     "lsp"  -- LSP status updates
   },
@@ -36,7 +36,7 @@ The default configuration is:
 This plugin provides some commands:
 ```vim
 :NotifierClear   " Clear the vim.notify items
-:NotifierReplay  " Replay all notifications
+:NotifierReplay  " Replay all vim.notify items
 ```
 
 This plugin defines multiple highlight groups that you can configure:
@@ -54,5 +54,6 @@ Heavily inspired by [fidget.nvim]
 
 - [x] Handle LSP progress
 - [x] Hook into `vim.notify` and friends
-  - [ ] Allow to customize log levels
+  - [x] Allow to customize log levels
+- [ ] When out, hook into `ui_attach` to route more messages from nvim
 
