@@ -41,7 +41,7 @@ ConfigModule.config = {
    end,
    components = { "nvim", "lsp" },
    notify = {
-      clear_time = 1000,
+      clear_time = 5000,
       min_level = vim.log.levels.INFO,
    },
    component_name_recall = false,
