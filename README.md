@@ -21,7 +21,7 @@ The default configuration is:
 {
   ignore_messages = {}, -- Ignore message from LSP servers with this name
   status_width = something, -- COmputed using 'columns' and 'textwidth'
-  components = {  -- Order of the components to draw (first nvim notifications, then lsp
+  components = {  -- Order of the components to draw (first nvim notifications, then lsp)
     "nvim",  -- Nvim notifications (vim.notify and such)
     "lsp"  -- LSP status updates
   },
