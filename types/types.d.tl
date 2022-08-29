@@ -9,10 +9,12 @@ global record vim
   record api
     type BufNr = integer
     type WinNr = integer
+    type NSId = integer
 
     record SetHlOptions
       link: string
       default: boolean
+      bg: string
     end
 
     record OpenWinOptions
@@ -54,14 +56,15 @@ global record vim
     nvim_create_autocmd: function(string|{string}, CreateAutocmdOptions)
     nvim_create_user_command: function(string, function(), CreateUserCommandOptions)
     nvim_buf_set_lines: function(BufNr, integer, integer, boolean, {string})
-    nvim_buf_add_highlight: function(BufNr, integer, string, integer, integer, integer)
-    nvim_buf_clear_namespace: function(BufNr, integer, integer, integer)
+    nvim_buf_add_highlight: function(BufNr, NSId, string, integer, integer, integer)
+    nvim_buf_clear_namespace: function(BufNr, NSId, integer, integer)
     nvim_open_win: function(BufNr, boolean, OpenWinOptions): WinNr
     nvim_win_close: function(WinNr, boolean)
     nvim_win_set_height: function(WinNr, integer)
     nvim_create_buf: function(boolean, boolean): BufNr
-    nvim_create_namespace: function(string): integer
-    nvim_set_hl: function(integer, string, SetHlOptions)
+    nvim_create_namespace: function(string): NSId
+    nvim_set_hl: function(NSId, string, SetHlOptions)
+    nvim_win_set_hl_ns: function(WinNr, NSId)
   end
 
   record log

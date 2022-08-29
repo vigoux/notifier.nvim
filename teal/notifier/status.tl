@@ -54,6 +54,7 @@ function StatusModule._create_win()
       col = vim.o.columns,
       zindex = 10,
     })
+    api.nvim_win_set_hl_ns(StatusModule.win_nr, cfg.NS_ID)
   end
 end
 

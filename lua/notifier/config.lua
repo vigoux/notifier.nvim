@@ -55,16 +55,15 @@ function ConfigModule.has_component(compname)
    return vim.tbl_contains(ConfigModule.config.components, compname)
 end
 
-local function hl_group(name)
-   return ConfigModule.NS_NAME .. name
+local function hl_group(name, options)
+   local hl_name = ConfigModule.NS_NAME .. name
+   vim.api.nvim_set_hl(ConfigModule.NS_ID, hl_name, options)
+   return hl_name
 end
 
-ConfigModule.HL_CONTENT_DIM = hl_group("ContentDim")
-ConfigModule.HL_CONTENT = hl_group("Content")
-ConfigModule.HL_TITLE = hl_group("Title")
-
-vim.api.nvim_set_hl(0, ConfigModule.HL_CONTENT_DIM, { link = "Comment", default = true })
-vim.api.nvim_set_hl(0, ConfigModule.HL_CONTENT, { link = "Normal", default = true })
-vim.api.nvim_set_hl(0, ConfigModule.HL_TITLE, { link = "Title", default = true })
+ConfigModule.HL_CONTENT_DIM = hl_group("ContentDim", { link = "Comment", default = true })
+ConfigModule.HL_CONTENT = hl_group("Content", { link = "Normal", default = true })
+ConfigModule.HL_TITLE = hl_group("Title", { link = "Title", default = true })
+vim.api.nvim_set_hl(ConfigModule.NS_ID, "NormalFloat", { bg = "bg" })
 
 return ConfigModule
