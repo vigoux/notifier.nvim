@@ -23,6 +23,8 @@ local ConfigModule = {Config = {Notify = {}, }, }
 
 
 
+
+
 ConfigModule.NS_NAME = "Notifier"
 ConfigModule.NS_ID = vim.api.nvim_create_namespace("notifier")
 
@@ -37,7 +39,7 @@ ConfigModule.config = {
          return math.floor(cols / 3)
       end
    end,
-   order = { "nvim", "lsp" },
+   components = { "nvim", "lsp" },
    notify = {
       clear_time = 1000,
       min_level = vim.log.levels.INFO,
@@ -47,6 +49,10 @@ ConfigModule.config = {
 
 function ConfigModule.update(other)
    ConfigModule.config = vim.tbl_deep_extend("force", ConfigModule.config, other or {})
+end
+
+function ConfigModule.has_component(compname)
+   return vim.tbl_contains(ConfigModule.config.components, compname)
 end
 
 local function hl_group(name)

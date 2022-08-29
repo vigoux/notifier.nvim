@@ -2,7 +2,7 @@ local record ConfigModule
   record Config
     ignore_messages: {string:boolean}
     status_width: integer|function():integer
-    order: {string}
+    components: {string}
     record Notify
       clear_time: integer
       min_level: integer
@@ -11,8 +11,10 @@ local record ConfigModule
     component_name_recall: boolean
   end
 
-  update: function(Config)
   config: Config
+
+  update: function(Config)
+  has_component: function(string): boolean
 
   NS_NAME: string
   NS_ID: integer
@@ -37,7 +39,7 @@ ConfigModule.config = {
       return math.floor(cols / 3)
     end
   end,
-  order = { "nvim", "lsp" },
+  components = { "nvim", "lsp" },
   notify = {
     clear_time = 1000,
     min_level = vim.log.levels.INFO
@@ -47,6 +49,10 @@ ConfigModule.config = {
 
 function ConfigModule.update(other: ConfigModule.Config)
   ConfigModule.config = vim.tbl_deep_extend("force", ConfigModule.config as {string:any}, other as {string:any} or {}) as ConfigModule.Config
+end
+
+function ConfigModule.has_component(compname: string): boolean
+  return vim.tbl_contains(ConfigModule.config.components, compname) 
 end
 
 local function hl_group(name: string): string

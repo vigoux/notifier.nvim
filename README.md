@@ -21,7 +21,10 @@ The default configuration is:
 {
   ignore_messages = {}, -- Ignore message from LSP servers with this name
   status_width = something, -- COmputed using 'columns' and 'textwidth'
-  order = { "nvim", "lsp" }, -- Order of the components to draw (first nvim notifications, then lsp
+  components = {  -- Order of the components to draw (first nvim notifications, then lsp
+    "nvim",  -- Nvim notifications (vim.notify and such)
+    "lsp"  -- LSP status updates
+  },
   notify = {
     clear_time = 1000, -- Time in milisecond before removing a vim.notifiy notification, 0 to make them sticky
     min_level = vim.log.level.INFO, -- Minimum log level to print the notification

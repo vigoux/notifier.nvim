@@ -104,7 +104,7 @@ function StatusModule.redraw()
    end
 
 
-   for _, compname in ipairs(cfg.config.order) do
+   for _, compname in ipairs(cfg.config.components) do
       local msgs = StatusModule.active[compname] or {}
       local is_tbl = vim.tbl_islist(msgs)
 

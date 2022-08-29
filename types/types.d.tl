@@ -95,6 +95,7 @@ global record vim
 
   tbl_deep_extend: function(string, ...: table): table
   tbl_islist: function({any:any}): boolean
+  tbl_contains: function<T>({T}, T): boolean
 
   pretty_print: function(any)
 end

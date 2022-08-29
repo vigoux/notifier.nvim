@@ -6,10 +6,6 @@ local NotifyOptions = {}
 
 
 
-api.nvim_create_augroup(config.NS_NAME, {
-   clear = true,
-})
-
 local notify_msg_cache = {}
 
 local function notify(msg, level, opts, no_cache)
@@ -39,28 +35,36 @@ local commands = {
 
 return {
    setup = function(user_config)
+      api.nvim_create_augroup(config.NS_NAME, {
+         clear = true,
+      })
+
       config.update(user_config)
 
-      vim.notify = function(msg, level, opts)
-         notify(msg, level, opts)
+      if config.has_component("nvim") then
+         vim.notify = function(msg, level, opts)
+            notify(msg, level, opts)
+         end
       end
 
       for cname, func in pairs(commands) do
          api.nvim_create_user_command(config.NS_NAME .. cname, func, {})
       end
 
-      api.nvim_create_autocmd({ "User" }, {
-         group = config.NS_NAME,
-         pattern = "LspProgressUpdate",
-         callback = function()
-            local new_messages = vim.lsp.util.get_progress_messages()
-            for _, msg in ipairs(new_messages) do
-               if not config.config.ignore_messages[msg.name] and msg.progress then
-                  status.handle(msg)
+      if config.has_component("lsp") then
+         api.nvim_create_autocmd({ "User" }, {
+            group = config.NS_NAME,
+            pattern = "LspProgressUpdate",
+            callback = function()
+               local new_messages = vim.lsp.util.get_progress_messages()
+               for _, msg in ipairs(new_messages) do
+                  if not config.config.ignore_messages[msg.name] and msg.progress then
+                     status.handle(msg)
+                  end
                end
-            end
-         end,
-      })
+            end,
+         })
+      end
 
       api.nvim_create_autocmd("VimResized", {
          group = config.NS_NAME,
