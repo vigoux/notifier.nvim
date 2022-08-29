@@ -67,6 +67,8 @@ ConfigModule.HL_CONTENT = hl_group("Content", { link = "Normal", default = true 
 ConfigModule.HL_TITLE = hl_group("Title", { link = "Title", default = true })
 
 
-vim.api.nvim_set_hl(ConfigModule.NS_ID, "NormalFloat", { bg = "bg" })
+if vim.api.nvim_win_set_hl_ns then
+   vim.api.nvim_set_hl(ConfigModule.NS_ID, "NormalFloat", { bg = "bg" })
+end
 
 return ConfigModule
