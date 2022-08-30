@@ -41,8 +41,17 @@ This plugin provides some commands:
 
 This plugin defines multiple highlight groups that you can configure:
 - `NotifierTitle`: the title of the notification (`lsp:..` and `nvim`)
+- `NotifierIcon`: Icon of the notification (if any)
 - `NotifierContent`: the content of the notification
 - `NotifierContentDim`: dimmed content of the notification
+
+## `vim.notify` options
+
+This plugin supports two options for `vim.notify`:
+```lua
+title: string -- The title for this notification
+icons: string -- The icon for this notification, must be of display width 1 (see strdisplaywidth())
+```
 
 ## Acknoledgement
 
@@ -56,4 +65,4 @@ Heavily inspired by [fidget.nvim]
 - [x] Hook into `vim.notify` and friends
   - [x] Allow to customize log levels
 - [ ] When out, hook into `ui_attach` to route more messages from nvim
-
+- [ ] Add docs for `status.push` and `status.pop`

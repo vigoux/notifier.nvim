@@ -4,6 +4,7 @@ local config = require "notifier.config"
 
 local record NotifyOptions
   title: string|nil
+  icon: string|nil
 end
 
 local notify_msg_cache = {}
@@ -12,7 +13,7 @@ local function notify(msg: string, level: integer, opts: NotifyOptions, no_cache
   level = vim.log.levels.INFO
   opts = opts or {}
   if level >= config.config.notify.min_level then
-    status.push("nvim", { mandat = msg, title = opts.title })
+    status.push("nvim", { mandat = msg, title = opts.title, icon = opts.icon })
     if not no_cache then
       table.insert(notify_msg_cache,  { msg = msg, level = level, opts = opts })
     end
