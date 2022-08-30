@@ -39,8 +39,8 @@ local function get_status_width(): integer
 end
 
 function StatusModule._create_win()
-  if not StatusModule.win_nr then
-    if not StatusModule.buf_nr then
+  if not StatusModule.win_nr or not vim.api.nvim_win_is_valid(StatusModule.win_nr) then
+    if not StatusModule.buf_nr or not vim.api.nvim_buf_is_valid(StatusModule.buf_nr) then
       StatusModule.buf_nr = api.nvim_create_buf(false, true);
     end
     StatusModule.win_nr = api.nvim_open_win(StatusModule.buf_nr, false, {

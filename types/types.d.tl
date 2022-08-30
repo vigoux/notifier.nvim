@@ -56,18 +56,20 @@ global record vim
       nested: boolean|nil
     end
 
-    nvim_create_augroup: function(string, CreateAugroupOptions)
-    nvim_create_autocmd: function(string|{string}, CreateAutocmdOptions)
-    nvim_create_user_command: function(string, function(), CreateUserCommandOptions)
-    nvim_buf_set_lines: function(BufNr, integer, integer, boolean, {string})
     nvim_buf_add_highlight: function(BufNr, NSId, string, integer, integer, integer)
     nvim_buf_clear_namespace: function(BufNr, NSId, integer, integer)
-    nvim_open_win: function(BufNr, boolean, OpenWinOptions): WinNr
-    nvim_win_close: function(WinNr, boolean)
-    nvim_win_set_height: function(WinNr, integer)
+    nvim_buf_is_valid: function(BufNr): boolean
+    nvim_buf_set_lines: function(BufNr, integer, integer, boolean, {string})
+    nvim_create_augroup: function(string, CreateAugroupOptions)
+    nvim_create_autocmd: function(string|{string}, CreateAutocmdOptions)
     nvim_create_buf: function(boolean, boolean): BufNr
     nvim_create_namespace: function(string): NSId
+    nvim_create_user_command: function(string, function(), CreateUserCommandOptions)
+    nvim_open_win: function(BufNr, boolean, OpenWinOptions): WinNr
     nvim_set_hl: function(NSId, string, SetHlOptions)
+    nvim_win_close: function(WinNr, boolean)
+    nvim_win_is_valid: function(WinNr): boolean
+    nvim_win_set_height: function(WinNr, integer)
     nvim_win_set_hl_ns: function(WinNr, NSId)
   end
 
