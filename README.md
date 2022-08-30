@@ -50,7 +50,7 @@ This plugin defines multiple highlight groups that you can configure:
 This plugin supports two options for `vim.notify`:
 ```lua
 title: string -- The title for this notification
-icons: string -- The icon for this notification, must be of display width 1 (see strdisplaywidth())
+icon: string -- The icon for this notification, must be of display width 1 (see strdisplaywidth())
 ```
 
 ## Acknoledgement
