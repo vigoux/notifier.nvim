@@ -195,7 +195,7 @@ function StatusModule.push(component, content, title)
    content = content
 
    if content.icon and displayw(content.icon) > 1 then
-      error("Message icon should be of length 1 character.")
+      error("Message icon should be of length one screen cell.")
    end
 
    if title then
