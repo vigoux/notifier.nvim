@@ -26,8 +26,8 @@ The default configuration is:
     "lsp"  -- LSP status updates
   },
   notify = {
-    clear_time = 1000, -- Time in milisecond before removing a vim.notifiy notification, 0 to make them sticky
-    min_level = vim.log.level.INFO, -- Minimum log level to print the notification
+    clear_time = 5000, -- Time in milisecond before removing a vim.notifiy notification, 0 to make them sticky
+    min_level = vim.log.levels.INFO, -- Minimum log level to print the notification
   },
   component_name_recall = false -- Whether to prefix the title of the notification by the component name
 }
@@ -41,8 +41,17 @@ This plugin provides some commands:
 
 This plugin defines multiple highlight groups that you can configure:
 - `NotifierTitle`: the title of the notification (`lsp:..` and `nvim`)
+- `NotifierIcon`: Icon of the notification (if any)
 - `NotifierContent`: the content of the notification
 - `NotifierContentDim`: dimmed content of the notification
+
+## `vim.notify` options
+
+This plugin supports two options for `vim.notify`:
+```lua
+title: string -- The title for this notification
+icon: string -- The icon for this notification, must be of display width 1 (see strdisplaywidth())
+```
 
 ## Acknoledgement
 
@@ -56,4 +65,4 @@ Heavily inspired by [fidget.nvim]
 - [x] Hook into `vim.notify` and friends
   - [x] Allow to customize log levels
 - [ ] When out, hook into `ui_attach` to route more messages from nvim
-
+- [ ] Add docs for `status.push` and `status.pop`

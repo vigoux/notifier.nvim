@@ -6,6 +6,10 @@ global record vim
     cmdheight: integer
   end
 
+  record fn
+    strdisplaywidth: function(string): integer
+  end
+
   record api
     type BufNr = integer
     type WinNr = integer

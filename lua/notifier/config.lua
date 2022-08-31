@@ -25,6 +25,10 @@ local ConfigModule = {Config = {Notify = {}, }, }
 
 
 
+
+
+
+
 ConfigModule.NS_NAME = "Notifier"
 ConfigModule.NS_ID = vim.api.nvim_create_namespace("notifier")
 
@@ -41,10 +45,11 @@ ConfigModule.config = {
    end,
    components = { "nvim", "lsp" },
    notify = {
-      clear_time = 1000,
+      clear_time = 5000,
       min_level = vim.log.levels.INFO,
    },
    component_name_recall = false,
+   debug = false,
 }
 
 function ConfigModule.update(other)
@@ -65,8 +70,11 @@ end
 ConfigModule.HL_CONTENT_DIM = hl_group("ContentDim", { link = "Comment", default = true })
 ConfigModule.HL_CONTENT = hl_group("Content", { link = "Normal", default = true })
 ConfigModule.HL_TITLE = hl_group("Title", { link = "Title", default = true })
+ConfigModule.HL_ICON = hl_group("Icon", { link = "Title", default = true })
 
 
-vim.api.nvim_set_hl(ConfigModule.NS_ID, "NormalFloat", { bg = "bg" })
+if vim.api.nvim_win_set_hl_ns then
+   vim.api.nvim_set_hl(ConfigModule.NS_ID, "NormalFloat", { bg = "NONE" })
+end
 
 return ConfigModule
