@@ -26,7 +26,7 @@ The default configuration is:
     "lsp"  -- LSP status updates
   },
   notify = {
-    clear_time = 5000, -- Time in milisecond before removing a vim.notifiy notification, 0 to make them sticky
+    clear_time = 5000, -- Time in milliseconds before removing a vim.notify notification, 0 to make them sticky
     min_level = vim.log.levels.INFO, -- Minimum log level to print the notification
   },
   component_name_recall = false -- Whether to prefix the title of the notification by the component name
@@ -53,7 +53,7 @@ title: string -- The title for this notification
 icon: string -- The icon for this notification, must be of display width 1 (see strdisplaywidth())
 ```
 
-## Acknoledgement
+## Acknowledgement
 
 Heavily inspired by [fidget.nvim]
 
