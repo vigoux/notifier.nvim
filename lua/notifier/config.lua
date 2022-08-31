@@ -74,7 +74,7 @@ ConfigModule.HL_ICON = hl_group("Icon", { link = "Title", default = true })
 
 
 if vim.api.nvim_win_set_hl_ns then
-   vim.api.nvim_set_hl(ConfigModule.NS_ID, "NormalFloat", { bg = "bg" })
+   vim.api.nvim_set_hl(ConfigModule.NS_ID, "NormalFloat", { bg = "NONE" })
 end
 
 return ConfigModule
