@@ -85,7 +85,7 @@ end
 local function format(name, msg, width)
    local inner_width = width - displayw(name) - 1
    if msg.icon then
-      inner_width = inner_width - 2
+      inner_width = inner_width - (displayw(msg.icon) + 1)
    end
 
 
@@ -162,7 +162,7 @@ function StatusModule.redraw()
 
          local title_start_offset = #lines[i] - #hl_infos[i].name
          if hl_infos[i].icon then
-            title_start_offset = title_start_offset - #hl_infos[i].icon - 1
+            title_start_offset = title_start_offset - (#hl_infos[i].icon + 1)
          end
 
          local title_stop_offset
@@ -196,8 +196,12 @@ function StatusModule.push(component, content, title)
 
    content = content
 
-   if content.icon and displayw(content.icon) > 1 then
-      error("Message icon should be of length one screen cell.")
+   if content.icon and displayw(content.icon) == 0 then
+      content.icon = nil
+   end
+
+   if content.title and displayw(content.title) == 0 then
+      content.title = nil
    end
 
    if title then

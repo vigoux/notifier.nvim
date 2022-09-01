@@ -85,7 +85,7 @@ end
 local function format(name: string, msg: Message, width: integer): string
   local inner_width: integer = width - displayw(name) - 1
   if msg.icon then
-    inner_width = inner_width - 2 -- One space plus the icon which is of size 1 cell
+    inner_width = inner_width - (displayw(msg.icon) + 1) -- One space plus the icon which is of size 1 cell
   end
 
   -- Try to render optional message part and see if it fits
@@ -162,7 +162,7 @@ function StatusModule.redraw()
       -- compared to the cell offsets
       local title_start_offset: integer = #lines[i] - #hl_infos[i].name
       if hl_infos[i].icon then
-        title_start_offset = title_start_offset - #hl_infos[i].icon - 1  -- Space + length of icon
+        title_start_offset = title_start_offset - (#hl_infos[i].icon + 1)
       end
 
       local title_stop_offset: integer
@@ -196,8 +196,12 @@ function StatusModule.push(component: string, content: Message|string, title: st
 
   content = content as Message
 
-  if content.icon and displayw(content.icon) > 1 then
-    error("Message icon should be of length one screen cell.")
+  if content.icon and displayw(content.icon) == 0 then
+    content.icon = nil
+  end
+
+  if content.title and displayw(content.title) == 0 then
+    content.title = nil
   end
 
   if title then
