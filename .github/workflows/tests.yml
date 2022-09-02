@@ -23,6 +23,6 @@ jobs:
       run: |
         nix-shell --pure --run "make ensure"
 
-#     - name: Run tests
-#       run: |
-#         nix-shell --pure --run "make test"
+    - name: Run tests
+      run: |
+        nix-shell --pure --run "make test"

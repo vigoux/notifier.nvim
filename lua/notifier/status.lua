@@ -25,6 +25,7 @@ local StatusModule = {}
 
 
 
+
 StatusModule.buf_nr = nil
 StatusModule.win_nr = nil
 StatusModule.active = {}
@@ -62,6 +63,11 @@ function StatusModule._create_win()
    end
 end
 
+function StatusModule._ui_valid()
+   return StatusModule.win_nr and api.nvim_win_is_valid(StatusModule.win_nr) and
+   StatusModule.buf_nr and api.nvim_buf_is_valid(StatusModule.buf_nr)
+end
+
 function StatusModule._delete_win()
    if StatusModule.win_nr and api.nvim_win_is_valid(StatusModule.win_nr) then
       api.nvim_win_close(StatusModule.win_nr, true)
@@ -69,16 +75,20 @@ function StatusModule._delete_win()
    StatusModule.win_nr = nil
 end
 
+local function padding(length)
+   local acc = ""
+   while displayw(acc) < length do
+      acc = " " .. acc
+   end
+
+   return acc
+end
+
 local function adjust_width(src, width)
    if displayw(src) > width then
       return string.sub(src, 1, width - 3) .. "..."
    else
-      local acc = src
-      while displayw(acc) < width do
-         acc = " " .. acc
-      end
-
-      return acc
+      return padding(width - displayw(src)) .. src
    end
 end
 
@@ -110,6 +120,8 @@ end
 
 function StatusModule.redraw()
    StatusModule._create_win()
+
+   if not StatusModule._ui_valid() then return end
 
    local lines = {}
    local hl_infos = {}
