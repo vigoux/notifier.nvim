@@ -99,12 +99,19 @@ global record vim
     end
   end
 
+  record SplitOptions
+    plain: boolean
+    trimempty: boolean
+  end
+
   notify: function(string, integer, {any:any})
   defer_fn: function(function(), integer)
 
+  tbl_contains: function<T>({T}, T): boolean
   tbl_deep_extend: function(string, ...: table): table
   tbl_islist: function({any:any}): boolean
-  tbl_contains: function<T>({T}, T): boolean
 
   pretty_print: function(any)
+
+  split: function(string, string, SplitOptions): {string}
 end

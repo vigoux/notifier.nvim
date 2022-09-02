@@ -26,6 +26,7 @@ local StatusModule = {}
 
 
 
+
 StatusModule.buf_nr = nil
 StatusModule.win_nr = nil
 StatusModule.active = {}
@@ -44,10 +45,16 @@ function StatusModule._create_win()
       if not StatusModule.buf_nr or not api.nvim_buf_is_valid(StatusModule.buf_nr) then
          StatusModule.buf_nr = api.nvim_create_buf(false, true);
       end
+      local border
+      if cfg.config.debug then
+         border = "single"
+      else
+         border = "none"
+      end
       StatusModule.win_nr = api.nvim_open_win(StatusModule.buf_nr, false, {
          focusable = false,
          style = "minimal",
-         border = "none",
+         border = border,
          noautocmd = true,
          relative = "editor",
          anchor = "SE",
@@ -92,32 +99,6 @@ local function adjust_width(src, width)
    end
 end
 
-local function format(name, msg, width)
-   local inner_width = width - displayw(name) - 1
-   if msg.icon then
-      inner_width = inner_width - (displayw(msg.icon) + 1)
-   end
-
-
-   local fmt_msg
-   if msg.opt then
-      local tmp = string.format("%s (%s)", msg.mandat, msg.opt)
-      if displayw(tmp) > inner_width then
-         fmt_msg = adjust_width(msg.mandat, inner_width)
-      else
-         fmt_msg = adjust_width(tmp, inner_width)
-      end
-   else
-      fmt_msg = adjust_width(msg.mandat, inner_width)
-   end
-
-   if msg.icon then
-      return string.format("%s %s %s", fmt_msg, name, msg.icon)
-   else
-      return string.format("%s %s", fmt_msg, name)
-   end
-end
-
 function StatusModule.redraw()
    StatusModule._create_win()
 
@@ -127,12 +108,52 @@ function StatusModule.redraw()
    local hl_infos = {}
    local width = get_status_width()
    local function push_line(title, content)
-      local formatted = format(title, content, width)
-      if cfg.config.debug then
-         vim.pretty_print(formatted)
+      local message_lines = vim.split(content.mandat, '\n', { plain = true, trimempty = true })
+
+
+      local inner_width = width - (displayw(title) + 1)
+      if content.icon then
+         inner_width = inner_width - (displayw(content.icon) + 1)
       end
-      table.insert(lines, formatted)
-      table.insert(hl_infos, { name = title, dim = content.dim, icon = content.icon })
+
+      if cfg.config.debug then
+         vim.pretty_print(message_lines)
+      end
+
+      for i, line in ipairs(message_lines) do
+
+
+
+         local fmt_msg
+         if content.opt and i == #message_lines then
+            local tmp = string.format("%s (%s)", line, content.opt)
+            if displayw(tmp) > inner_width then
+               fmt_msg = adjust_width(line, inner_width)
+            else
+               fmt_msg = adjust_width(tmp, inner_width)
+            end
+         else
+            fmt_msg = adjust_width(line, inner_width)
+         end
+
+         local formatted
+         if i == 1 then
+            if content.icon then
+               formatted = string.format("%s %s %s", fmt_msg, title, content.icon)
+            else
+               formatted = string.format("%s %s", fmt_msg, title)
+            end
+         else
+            formatted = string.format("%s %s", fmt_msg, padding(width - (inner_width + 1)))
+         end
+
+         if cfg.config.debug then
+            vim.pretty_print(formatted)
+         end
+
+         table.insert(lines, formatted)
+         table.insert(hl_infos, { name = title, dim = content.dim, icon = content.icon })
+      end
    end
 
 
@@ -197,6 +218,30 @@ function StatusModule.redraw()
    end
 end
 
+function StatusModule._ensure_valid(msg)
+   if msg.icon and displayw(msg.icon) == 0 then
+      msg.icon = nil
+   end
+
+   if msg.title and displayw(msg.title) == 0 then
+      msg.title = nil
+   end
+
+   if msg.title and string.find(msg.title, "\n") then
+      error("Message title cannot contain newlines")
+   end
+
+   if msg.icon and string.find(msg.icon, "\n") then
+      error("Message icon cannot contain newlines")
+   end
+
+   if msg.opt and string.find(msg.opt, "\n") then
+      error("Message optional part cannot contain newlines")
+   end
+
+   return true
+end
+
 function StatusModule.push(component, content, title)
    if not StatusModule.active[component] then
       StatusModule.active[component] = {}
@@ -207,21 +252,14 @@ function StatusModule.push(component, content, title)
    end
 
    content = content
-
-   if content.icon and displayw(content.icon) == 0 then
-      content.icon = nil
+   if StatusModule._ensure_valid(content) then
+      if title then
+         StatusModule.active[component][title] = content
+      else
+         table.insert(StatusModule.active[component], content)
+      end
+      StatusModule.redraw()
    end
-
-   if content.title and displayw(content.title) == 0 then
-      content.title = nil
-   end
-
-   if title then
-      StatusModule.active[component][title] = content
-   else
-      table.insert(StatusModule.active[component], content)
-   end
-   StatusModule.redraw()
 end
 
 function StatusModule.pop(component, title)

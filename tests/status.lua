@@ -23,10 +23,22 @@ describe('status window', function()
     vim.o.lines = 100
   end)
 
+  after_each(function()
+    status.clear "test"
+  end)
+
   it('works', function()
     status.push("test", "test")
     assert_status {
       '                               test test'
+    }
+  end)
+
+  it('handles multiline notifications #8', function()
+    status.push("test", "test\ntest")
+    assert_status {
+      '                               test test',
+      '                               test     '
     }
   end)
 end)
