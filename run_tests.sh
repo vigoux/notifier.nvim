@@ -6,7 +6,6 @@ find tests/ -name "*.lua" | while read file
 do
   nvim --clean -u min.vim -c "redir > /tmp/res" -c "luafile $file" -c "quit"
 done
-clear
 cat /tmp/res
 if ! grep -q "^not ok" /tmp/res
 then

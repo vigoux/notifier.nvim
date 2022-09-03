@@ -3,6 +3,7 @@ local status = require 'notifier.status'
 require 'busted.runner' { output = 'TAP', shuffle = true }
 
 local function get_status_lines()
+  assert.Truthy(status._ui_valid())
   return vim.api.nvim_buf_get_lines(status.buf_nr, 0, -1, true)
 end
 
