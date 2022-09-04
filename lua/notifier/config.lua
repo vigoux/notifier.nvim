@@ -29,6 +29,8 @@ local ConfigModule = {Config = {Notify = {}, }, }
 
 
 
+
+
 ConfigModule.NS_NAME = "Notifier"
 ConfigModule.NS_ID = vim.api.nvim_create_namespace("notifier")
 
@@ -50,6 +52,7 @@ ConfigModule.config = {
    },
    component_name_recall = false,
    debug = false,
+   zindex = 50,
 }
 
 function ConfigModule.update(other)

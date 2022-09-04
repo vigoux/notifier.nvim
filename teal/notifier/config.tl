@@ -12,6 +12,8 @@ local record ConfigModule
 
     -- For... debug purposes
     debug: boolean
+
+    zindex: integer
   end
 
   config: Config
@@ -50,6 +52,7 @@ ConfigModule.config = {
   } as ConfigModule.Config.Notify,
   component_name_recall = false,
   debug = false,
+  zindex = 50,
 }
 
 function ConfigModule.update(other: ConfigModule.Config)
