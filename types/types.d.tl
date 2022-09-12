@@ -1,3 +1,5 @@
+global unpack: function<T>({T}, number, number): T...
+
 global record vim
   record o
     textwidth: integer
@@ -114,4 +116,6 @@ global record vim
   pretty_print: function(any)
 
   split: function(string, string, SplitOptions): {string}
+
+  schedule: function(function())
 end

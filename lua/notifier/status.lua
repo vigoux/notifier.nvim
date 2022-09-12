@@ -31,6 +31,12 @@ StatusModule.buf_nr = nil
 StatusModule.win_nr = nil
 StatusModule.active = {}
 
+local function scheduled(func)
+   return function()
+      vim.schedule(func)
+   end
+end
+
 local function get_status_width()
    local w = cfg.config.status_width
    if type(w) == "function" then
@@ -99,7 +105,7 @@ local function adjust_width(src, width)
    end
 end
 
-function StatusModule.redraw()
+StatusModule.redraw = scheduled(function()
    StatusModule._create_win()
 
    if not StatusModule._ui_valid() then return end
@@ -107,6 +113,9 @@ function StatusModule.redraw()
    local lines = {}
    local hl_infos = {}
    local width = get_status_width()
+
+
+
    local function push_line(title, content)
       local message_lines = vim.split(content.mandat, '\n', { plain = true, trimempty = true })
 
@@ -126,6 +135,7 @@ function StatusModule.redraw()
 
          local fmt_msg
          if content.opt and i == #message_lines then
+
             local tmp = string.format("%s (%s)", line, content.opt)
             if displayw(tmp) > inner_width then
                fmt_msg = adjust_width(line, inner_width)
@@ -150,6 +160,7 @@ function StatusModule.redraw()
          if cfg.config.debug then
             vim.pretty_print(formatted)
          end
+
 
          table.insert(lines, formatted)
          table.insert(hl_infos, { name = title, dim = content.dim, icon = content.icon })
@@ -216,7 +227,7 @@ function StatusModule.redraw()
    else
       StatusModule._delete_win()
    end
-end
+end)
 
 function StatusModule._ensure_valid(msg)
    if msg.icon and displayw(msg.icon) == 0 then

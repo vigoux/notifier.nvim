@@ -31,6 +31,12 @@ StatusModule.buf_nr = nil
 StatusModule.win_nr = nil
 StatusModule.active = {}
 
+local function scheduled(func: function()): function()
+  return function()
+    vim.schedule(func)
+  end
+end
+
 local function get_status_width(): integer
   local w = cfg.config.status_width
   if w is function(): integer then
@@ -99,7 +105,7 @@ local function adjust_width(src: string, width: integer): string
   end
 end
 
-function StatusModule.redraw()
+StatusModule.redraw = scheduled(function()
   StatusModule._create_win()
 
   if not StatusModule._ui_valid() then return end
@@ -107,6 +113,9 @@ function StatusModule.redraw()
   local lines = {}
   local hl_infos = {}
   local width = get_status_width()
+
+  -- This is the main "drawing" function, handling en ensure the correct placement of everything in
+  -- the message
   local function push_line(title: string, content: Message)
     local message_lines = vim.split(content.mandat, '\n', { plain = true, trimempty = true })
 
@@ -126,6 +135,7 @@ function StatusModule.redraw()
       -- Try to render optional message part and see if it fits
       local fmt_msg: string
       if content.opt and i == #message_lines then
+        -- The optional parts of messages is drawn with the last line
         local tmp = string.format("%s (%s)", line, content.opt)
         if displayw(tmp) > inner_width then
           fmt_msg = adjust_width(line, inner_width)
@@ -151,6 +161,7 @@ function StatusModule.redraw()
         vim.pretty_print(formatted)
       end
 
+      -- TODO(vigoux): right allign multiline messages instead of push like this
       table.insert(lines, formatted)
       table.insert(hl_infos, { name = title, dim = content.dim, icon = content.icon })
     end
@@ -216,7 +227,7 @@ function StatusModule.redraw()
   else
     StatusModule._delete_win()
   end
-end
+end)
 
 function StatusModule._ensure_valid(msg: Message): boolean
   if msg.icon and displayw(msg.icon) == 0 then

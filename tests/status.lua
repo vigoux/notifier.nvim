@@ -30,16 +30,20 @@ describe('status window', function()
 
   it('works', function()
     status.push("test", "test")
-    assert_status {
-      '                               test test'
-    }
+    vim.schedule(function()
+      assert_status {
+        '                               test test'
+      }
+    end)
   end)
 
   it('handles multiline notifications #8', function()
     status.push("test", "test\ntest")
-    assert_status {
-      '                               test test',
-      '                               test     '
-    }
+    vim.schedule(function()
+      assert_status {
+        '                               test test',
+        '                               test     '
+      }
+    end)
   end)
 end)
