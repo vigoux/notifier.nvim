@@ -105,6 +105,29 @@ local function adjust_width(src, width)
    end
 end
 
+local function wrap_lines(content, width)
+   local message_blocks = vim.split(content, '\n', { plain = true, trimempty = true })
+
+   local message_lines = {}
+   for _, block in ipairs(message_blocks) do
+      if #block <= width then
+         table.insert(message_lines, block)
+      else
+         local len = #block
+         local start = 1
+         while len > 0 do
+            local line = string.sub(block, start, start + width - 1)
+            local trimmed = string.gsub(line, '^%s*(.-)%s*$', '%1')
+            table.insert(message_lines, trimmed)
+            start = start + width
+            len = len - width
+         end
+      end
+   end
+
+   return message_lines
+end
+
 StatusModule.redraw = scheduled(function()
    StatusModule._create_win()
 
@@ -117,13 +140,12 @@ StatusModule.redraw = scheduled(function()
 
 
    local function push_line(title, content)
-      local message_lines = vim.split(content.mandat, '\n', { plain = true, trimempty = true })
-
-
       local inner_width = width - (displayw(title) + 1)
       if content.icon then
          inner_width = inner_width - (displayw(content.icon) + 1)
       end
+
+      local message_lines = wrap_lines(content.mandat, inner_width)
 
       if cfg.config.debug then
          vim.pretty_print(message_lines)
