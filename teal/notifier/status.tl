@@ -88,21 +88,14 @@ function StatusModule._delete_win()
   StatusModule.win_nr = nil
 end
 
-local function padding(length: integer): string
-  local acc = ""
-  while displayw(acc) < length do
-    acc = " " .. acc
-  end
-
-  return acc
+local function adjust_width(src: string, width: integer): string
+  return vim.fn["repeat"](" ", width - displayw(src)) .. src
 end
 
-local function adjust_width(src: string, width: integer): string
-  if displayw(src) > width then
-    return string.sub(src, 1, width - 3) .. "..."
-  else
-    return padding(width - displayw(src)) .. src
-  end
+local record HlInfo
+  name: string
+  icon: string
+  dim: boolean
 end
 
 StatusModule.redraw = scheduled(function()
@@ -110,8 +103,8 @@ StatusModule.redraw = scheduled(function()
 
   if not StatusModule._ui_valid() then return end
 
-  local lines = {}
-  local hl_infos = {}
+  local lines: {string} = {}
+  local hl_infos: {integer:HlInfo} = {}
   local width = get_status_width()
 
   -- This is the main "drawing" function, handling en ensure the correct placement of everything in
@@ -129,32 +122,71 @@ StatusModule.redraw = scheduled(function()
       vim.pretty_print(message_lines)
     end
 
+    -- Now go over each line, and if it does not fit break the line in multiple parts
+    local tmp_lines: {string} = {}
+    local maxlen: integer = 0
+
+    for _, line in ipairs(message_lines) do
+      local tmp_line: string
+      local words = vim.split(line, '%s', { trimempty = true })
+
+      for _, w in ipairs(words) do
+        local tmp: string
+        if not tmp_line then
+          tmp = w
+        else
+          tmp = tmp_line .. ' ' .. w
+        end
+
+        if displayw(tmp) > inner_width then
+          tmp_lines[#tmp_lines + 1] = tmp_line
+          maxlen = math.max(maxlen, displayw(tmp_line))
+          tmp_line = w
+        else
+          tmp_line = tmp
+        end
+      end
+
+      tmp_lines[#tmp_lines + 1] = tmp_line
+      maxlen = math.max(maxlen, displayw(tmp_line))
+    end
+
+    message_lines = tmp_lines
+
+    if cfg.config.debug then
+      vim.pretty_print(message_lines)
+    end
+
     for i,line in ipairs(message_lines) do
       -- This is where we handle multiline notifications
+
+      -- For a given line, the amount of space to be left-alligned in the message
+      local right_pad_len = maxlen - displayw(line)
 
       -- Try to render optional message part and see if it fits
       local fmt_msg: string
       if content.opt and i == #message_lines then
         -- The optional parts of messages is drawn with the last line
         local tmp = string.format("%s (%s)", line, content.opt)
-        if displayw(tmp) > inner_width then
-          fmt_msg = adjust_width(line, inner_width)
+        if displayw(tmp) > inner_width - right_pad_len then
+          fmt_msg = adjust_width(line, inner_width - right_pad_len)
         else
-          fmt_msg = adjust_width(tmp, inner_width)
+          fmt_msg = adjust_width(tmp, inner_width - right_pad_len)
         end
       else
-        fmt_msg = adjust_width(line, inner_width)
+        fmt_msg = adjust_width(line, inner_width - right_pad_len)
       end
 
       local formatted: string
       if i == 1 then
+        local right_pad: string = vim.fn["repeat"](' ', right_pad_len)
         if content.icon then
-          formatted = string.format("%s %s %s", fmt_msg, title, content.icon)
+          formatted = string.format("%s%s %s %s", fmt_msg, right_pad, title, content.icon)
         else
-          formatted = string.format("%s %s", fmt_msg, title)
+          formatted = string.format("%s%s %s", fmt_msg, right_pad, title)
         end
       else
-        formatted = string.format("%s %s", fmt_msg, padding(width - (inner_width + 1)))
+        formatted = fmt_msg
       end
 
       if cfg.config.debug then
@@ -163,7 +195,11 @@ StatusModule.redraw = scheduled(function()
 
       -- TODO(vigoux): right allign multiline messages instead of push like this
       table.insert(lines, formatted)
-      table.insert(hl_infos, { name = title, dim = content.dim, icon = content.icon })
+      if i == 1 then
+        table.insert(hl_infos, { name = title, dim = content.dim, icon = content.icon })
+      else
+        table.insert(hl_infos, { name = "", icon = "", dim = content.dim })
+      end
     end
   end
 

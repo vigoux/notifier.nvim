@@ -10,6 +10,7 @@ global record vim
 
   record fn
     strdisplaywidth: function(string): integer
+    ["repeat"]: function<T>(T, integer): T
   end
 
   record api

@@ -42,7 +42,18 @@ describe('status window', function()
     vim.schedule(function()
       assert_status {
         '                               test test',
-        '                               test     '
+        '                               test'
+      }
+    end)
+  end)
+
+  it('handles very long notifications #11', function()
+    status.push('test', 'very long notification that should wrap correctly otherwise that is a bug')
+    vim.schedule(function()
+      assert_status {
+        ' very long notification that should test',
+        ' wrap correctly otherwise that is a',
+        ' bug'
       }
     end)
   end)

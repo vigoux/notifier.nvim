@@ -2,7 +2,6 @@ local api = vim.api
 local cfg = require("notifier.config")
 local displayw = vim.fn.strdisplaywidth
 
-local Message = {}
 
 
 
@@ -10,7 +9,8 @@ local Message = {}
 
 
 
-local Component = {}
+
+
 
 local StatusModule = {}
 
@@ -88,22 +88,15 @@ function StatusModule._delete_win()
    StatusModule.win_nr = nil
 end
 
-local function padding(length)
-   local acc = ""
-   while displayw(acc) < length do
-      acc = " " .. acc
-   end
-
-   return acc
-end
-
 local function adjust_width(src, width)
-   if displayw(src) > width then
-      return string.sub(src, 1, width - 3) .. "..."
-   else
-      return padding(width - displayw(src)) .. src
-   end
+   return vim.fn["repeat"](" ", width - displayw(src)) .. src
 end
+
+
+
+
+
+
 
 StatusModule.redraw = scheduled(function()
    StatusModule._create_win()
@@ -129,32 +122,71 @@ StatusModule.redraw = scheduled(function()
          vim.pretty_print(message_lines)
       end
 
+
+      local tmp_lines = {}
+      local maxlen = 0
+
+      for _, line in ipairs(message_lines) do
+         local tmp_line
+         local words = vim.split(line, '%s', { trimempty = true })
+
+         for _, w in ipairs(words) do
+            local tmp
+            if not tmp_line then
+               tmp = w
+            else
+               tmp = tmp_line .. ' ' .. w
+            end
+
+            if displayw(tmp) > inner_width then
+               tmp_lines[#tmp_lines + 1] = tmp_line
+               maxlen = math.max(maxlen, displayw(tmp_line))
+               tmp_line = w
+            else
+               tmp_line = tmp
+            end
+         end
+
+         tmp_lines[#tmp_lines + 1] = tmp_line
+         maxlen = math.max(maxlen, displayw(tmp_line))
+      end
+
+      message_lines = tmp_lines
+
+      if cfg.config.debug then
+         vim.pretty_print(message_lines)
+      end
+
       for i, line in ipairs(message_lines) do
 
+
+
+         local right_pad_len = maxlen - displayw(line)
 
 
          local fmt_msg
          if content.opt and i == #message_lines then
 
             local tmp = string.format("%s (%s)", line, content.opt)
-            if displayw(tmp) > inner_width then
-               fmt_msg = adjust_width(line, inner_width)
+            if displayw(tmp) > inner_width - right_pad_len then
+               fmt_msg = adjust_width(line, inner_width - right_pad_len)
             else
-               fmt_msg = adjust_width(tmp, inner_width)
+               fmt_msg = adjust_width(tmp, inner_width - right_pad_len)
             end
          else
-            fmt_msg = adjust_width(line, inner_width)
+            fmt_msg = adjust_width(line, inner_width - right_pad_len)
          end
 
          local formatted
          if i == 1 then
+            local right_pad = vim.fn["repeat"](' ', right_pad_len)
             if content.icon then
-               formatted = string.format("%s %s %s", fmt_msg, title, content.icon)
+               formatted = string.format("%s%s %s %s", fmt_msg, right_pad, title, content.icon)
             else
-               formatted = string.format("%s %s", fmt_msg, title)
+               formatted = string.format("%s%s %s", fmt_msg, right_pad, title)
             end
          else
-            formatted = string.format("%s %s", fmt_msg, padding(width - (inner_width + 1)))
+            formatted = fmt_msg
          end
 
          if cfg.config.debug then
@@ -163,7 +195,11 @@ StatusModule.redraw = scheduled(function()
 
 
          table.insert(lines, formatted)
-         table.insert(hl_infos, { name = title, dim = content.dim, icon = content.icon })
+         if i == 1 then
+            table.insert(hl_infos, { name = title, dim = content.dim, icon = content.icon })
+         else
+            table.insert(hl_infos, { name = "", icon = "", dim = content.dim })
+         end
       end
    end
 
