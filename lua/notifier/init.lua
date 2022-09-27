@@ -10,7 +10,7 @@ local config = require("notifier.config")
 local notify_msg_cache = {}
 
 local function notify(msg, level, opts, no_cache)
-   level = vim.log.levels.INFO
+   level = level or vim.log.levels.INFO
    opts = opts or {}
    if level >= config.config.notify.min_level then
       status.push("nvim", { mandat = msg, title = opts.title, icon = opts.icon })
