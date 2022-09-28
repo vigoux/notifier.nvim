@@ -17,4 +17,4 @@ nix-test:
 	nix-shell --pure --run "./run_tests.sh"
 
 nix-debug:
-	nix-shell --pure --run "nvim --clean -u min.vim"
+	nix-shell --pure --run "nvim --clean -u min.lua"

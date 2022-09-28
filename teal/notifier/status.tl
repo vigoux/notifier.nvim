@@ -31,11 +31,11 @@ StatusModule.buf_nr = nil
 StatusModule.win_nr = nil
 StatusModule.active = {}
 
-local function scheduled(func: function()): function()
-  return function()
-    vim.schedule(func)
-  end
-end
+-- local function scheduled(func: function()): function()
+--   return function()
+--     vim.schedule(func)
+--   end
+-- end
 
 local function get_status_width(): integer
   local w = cfg.config.status_width
@@ -98,7 +98,7 @@ local record HlInfo
   dim: boolean
 end
 
-StatusModule.redraw = scheduled(function()
+function StatusModule.redraw()
   StatusModule._create_win()
 
   if not StatusModule._ui_valid() then return end
@@ -263,7 +263,7 @@ StatusModule.redraw = scheduled(function()
   else
     StatusModule._delete_win()
   end
-end)
+end
 
 function StatusModule._ensure_valid(msg: Message): boolean
   if msg.icon and displayw(msg.icon) == 0 then

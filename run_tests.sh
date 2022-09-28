@@ -1,13 +1,15 @@
 #!/bin/sh
 
-rm -f /tmp/res
+RES_FILE="/tmp/res"
+
+rm -f "$RES_FILE"
 
 find tests/ -name "*.lua" | while read file
 do
-  nvim --clean -u min.vim -c "redir > /tmp/res" -c "luafile $file" -c "quit"
+  nvim --headless --clean -u min.lua -c "redir >> $RES_FILE" -c "luafile $file" -c "quit" 2> /dev/null
 done
-cat /tmp/res
-if ! grep -q "^not ok" /tmp/res
+cat "$RES_FILE"
+if ! grep -q "^not ok" "$RES_FILE"
 then
   exit 0
 else

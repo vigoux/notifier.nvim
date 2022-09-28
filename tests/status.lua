@@ -18,43 +18,31 @@ notifier.setup {
 
 describe('status window', function()
 
-  before_each(function()
-    vim.o.columns = 100
-    vim.o.textwidth = 40
-    vim.o.lines = 100
-  end)
-
   after_each(function()
     status.clear "test"
   end)
 
   it('works', function()
     status.push("test", "test")
-    vim.schedule(function()
-      assert_status {
-        '                               test test'
-      }
-    end)
+    assert_status {
+      '                               test test'
+    }
   end)
 
   it('handles multiline notifications #8', function()
     status.push("test", "test\ntest")
-    vim.schedule(function()
-      assert_status {
-        '                               test test',
-        '                               test'
-      }
-    end)
+    assert_status {
+      '                               test test',
+      '                               test'
+    }
   end)
 
   it('handles very long notifications #11', function()
     status.push('test', 'very long notification that should wrap correctly otherwise that is a bug')
-    vim.schedule(function()
-      assert_status {
-        ' very long notification that should test',
-        ' wrap correctly otherwise that is a',
-        ' bug'
-      }
-    end)
+    assert_status {
+      ' very long notification that should test',
+      ' wrap correctly otherwise that is a',
+      ' bug'
+    }
   end)
 end)
