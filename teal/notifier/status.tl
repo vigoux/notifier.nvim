@@ -31,12 +31,6 @@ StatusModule.buf_nr = nil
 StatusModule.win_nr = nil
 StatusModule.active = {}
 
--- local function scheduled(func: function()): function()
---   return function()
---     vim.schedule(func)
---   end
--- end
-
 local function get_status_width(): integer
   local w = cfg.config.status_width
   if w is function(): integer then

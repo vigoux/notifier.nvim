@@ -31,12 +31,6 @@ StatusModule.buf_nr = nil
 StatusModule.win_nr = nil
 StatusModule.active = {}
 
-
-
-
-
-
-
 local function get_status_width()
    local w = cfg.config.status_width
    if type(w) == "function" then
