@@ -37,6 +37,22 @@ describe('status window', function()
     }
   end)
 
+  it('right alligns notifications', function()
+    status.push("test", "test with more text\ntest")
+    assert_status {
+      '                test with more text test',
+      '                test',
+    }
+
+    status.push("test", "test\ntest")
+    assert_status {
+      '                test with more text test',
+      '                test',
+      '                               test test',
+      '                               test'
+    }
+  end)
+
   it('handles very long notifications #11', function()
     status.push('test', 'very long notification that should wrap correctly otherwise that is a bug')
     assert_status {
