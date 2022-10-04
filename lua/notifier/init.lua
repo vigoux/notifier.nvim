@@ -36,6 +36,9 @@ local commands = {
 }
 
 return {
+   notify = function(msg, level, opts)
+      notify(msg, level, opts)
+   end,
    setup = function(user_config)
       api.nvim_create_augroup(config.NS_NAME, {
          clear = true,
