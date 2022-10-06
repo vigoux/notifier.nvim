@@ -8,8 +8,34 @@ global record vim
     cmdheight: integer
   end
 
+  record BufNr
+  end
+
+  record QfItem
+    bufnr: BufNr
+    filename: string
+
+    lnum: integer
+    end_lnum: integer
+    col: integer
+    end_col: integer
+
+    text: string
+    type: string
+    valid: integer
+
+
+    -- Not really useful stuff
+    nr: integer
+    vcol: integer
+    module: string
+    pattern: string
+  end
+
+
   record fn
     strdisplaywidth: function(string): integer
+    setqflist: function({QfItem}, string, {string:boolean})
     ["repeat"]: function<T>(T, integer): T
   end
 
@@ -45,7 +71,13 @@ global record vim
       clear: boolean
     end
 
+    record UserCommandArgs
+      args: {string}
+      bang: boolean
+    end
+
     record CreateUserCommandOptions
+      bang: boolean
     end
 
     record CreateAutocmdOptions
@@ -67,7 +99,7 @@ global record vim
     nvim_create_autocmd: function(string|{string}, CreateAutocmdOptions)
     nvim_create_buf: function(boolean, boolean): BufNr
     nvim_create_namespace: function(string): NSId
-    nvim_create_user_command: function(string, function(), CreateUserCommandOptions)
+    nvim_create_user_command: function(string, function(UserCommandArgs), CreateUserCommandOptions)
     nvim_open_win: function(BufNr, boolean, OpenWinOptions): WinNr
     nvim_set_hl: function(NSId, string, SetHlOptions)
     nvim_win_close: function(WinNr, boolean)

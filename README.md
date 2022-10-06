@@ -38,6 +38,7 @@ This plugin provides some commands:
 ```vim
 :NotifierClear   " Clear the vim.notify items
 :NotifierReplay  " Replay all vim.notify items
+:NotifierReplay!  " Replay all vim.notify items to the quickfix list
 ```
 
 This plugin defines multiple highlight groups that you can configure:

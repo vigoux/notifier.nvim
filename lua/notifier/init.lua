@@ -2,7 +2,7 @@ local api = vim.api
 local status = require("notifier.status")
 local config = require("notifier.config")
 
-
+local NotifyOptions = {}
 
 
 
@@ -24,15 +24,39 @@ local function notify(msg, level, opts, no_cache)
    end
 end
 
+local CommandDef = {}
+
+
+
+
 local commands = {
-   Clear = function()
-      status.clear("nvim")
-   end,
-   Replay = function()
-      for _, msg in ipairs(notify_msg_cache) do
-         notify(msg.msg, msg.level, msg.opts, true)
-      end
-   end,
+   Clear = {
+      opts = {},
+      func = function()
+         status.clear("nvim")
+      end,
+   },
+   Replay = {
+      opts = {
+         bang = true,
+      },
+      func = function(args)
+         if args.bang then
+            local list = {}
+            for _, msg in ipairs(notify_msg_cache) do
+               list[#list + 1] = {
+                  text = msg.msg,
+               }
+            end
+
+            vim.fn.setqflist(list, 'r')
+         else
+            for _, msg in ipairs(notify_msg_cache) do
+               notify(msg.msg, msg.level, msg.opts, true)
+            end
+         end
+      end,
+   },
 }
 
 return {
@@ -52,8 +76,8 @@ return {
          end
       end
 
-      for cname, func in pairs(commands) do
-         api.nvim_create_user_command(config.NS_NAME .. cname, func, {})
+      for cname, def in pairs(commands) do
+         api.nvim_create_user_command(config.NS_NAME .. cname, def.func, def.opts)
       end
 
       if config.has_component("lsp") then
