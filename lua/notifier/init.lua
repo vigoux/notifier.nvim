@@ -2,7 +2,7 @@ local api = vim.api
 local status = require("notifier.status")
 local config = require("notifier.config")
 
-local NotifyOptions = {}
+
 
 
 
@@ -24,7 +24,7 @@ local function notify(msg, level, opts, no_cache)
    end
 end
 
-local CommandDef = {}
+
 
 
 

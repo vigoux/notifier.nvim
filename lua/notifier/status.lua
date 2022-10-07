@@ -2,7 +2,6 @@ local api = vim.api
 local cfg = require("notifier.config")
 local displayw = vim.fn.strdisplaywidth
 
-local Message = {}
 
 
 
@@ -10,7 +9,8 @@ local Message = {}
 
 
 
-local Component = {}
+
+
 
 local StatusModule = {}
 
@@ -86,7 +86,7 @@ local function adjust_width(src, width)
    return vim.fn["repeat"](" ", width - displayw(src)) .. src
 end
 
-local HlInfo = {}
+
 
 
 
