@@ -12,6 +12,7 @@ local displayw = vim.fn.strdisplaywidth
 
 
 
+
 local StatusModule = {}
 
 
@@ -85,6 +86,7 @@ end
 local function adjust_width(src, width)
    return vim.fn["repeat"](" ", width - displayw(src)) .. src
 end
+
 
 
 
@@ -190,9 +192,9 @@ function StatusModule.redraw()
 
          table.insert(lines, formatted)
          if i == 1 then
-            table.insert(hl_infos, { name = title, dim = content.dim, icon = content.icon })
+            table.insert(hl_infos, { name = title, dim = content.dim, icon = content.icon, level = content.level })
          else
-            table.insert(hl_infos, { name = "", icon = "", dim = content.dim })
+            table.insert(hl_infos, { name = "", icon = "", dim = content.dim, level = content.level })
          end
       end
    end
@@ -229,7 +231,12 @@ function StatusModule.redraw()
          if hl_infos[i].dim then
             hl_group = cfg.HL_CONTENT_DIM
          else
-            hl_group = cfg.HL_CONTENT
+            local HL_CONTENT = cfg.HL_CONTENT
+            if type(HL_CONTENT) == "string" then
+               hl_group = HL_CONTENT
+            else
+               hl_group = HL_CONTENT[hl_infos[i].level]
+            end
          end
 
 
@@ -245,7 +252,7 @@ function StatusModule.redraw()
          else
             title_stop_offset = -1
          end
-         api.nvim_buf_add_highlight(StatusModule.buf_nr, cfg.NS_ID, hl_group, i - 1, 0, title_start_offset - 1)
+         api.nvim_buf_add_highlight(StatusModule.buf_nr, cfg.NS_ID, hl_group, i - 1, 0, title_start_offset + 1)
          api.nvim_buf_add_highlight(StatusModule.buf_nr, cfg.NS_ID, cfg.HL_TITLE, i - 1, title_start_offset, title_stop_offset)
 
          if hl_infos[i].icon then

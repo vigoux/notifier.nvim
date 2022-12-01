@@ -8,6 +8,7 @@ local record Message
   title: string|nil
   icon: string|nil
   opt: string|nil
+  level: integer
 end
 
 local type Component = {string|integer:Message}
@@ -90,6 +91,7 @@ local record HlInfo
   name: string
   icon: string
   dim: boolean
+  level: integer
 end
 
 function StatusModule.redraw()
@@ -154,7 +156,7 @@ function StatusModule.redraw()
     for i,line in ipairs(message_lines) do
       -- This is where we handle multiline notifications
 
-      -- For a given line, the amount of space to be left-alligned in the message
+      -- For a given line, the amount of space to be left-aligned in the message
       local right_pad_len = maxlen - displayw(line)
 
       -- Try to render optional message part and see if it fits
@@ -187,12 +189,12 @@ function StatusModule.redraw()
         vim.pretty_print(formatted)
       end
 
-      -- TODO(vigoux): right allign multiline messages instead of push like this
+      -- TODO(vigoux): right align multiline messages instead of push like this
       table.insert(lines, formatted)
       if i == 1 then
-        table.insert(hl_infos, { name = title, dim = content.dim, icon = content.icon })
+        table.insert(hl_infos, { name = title, dim = content.dim, icon = content.icon, level = content.level })
       else
-        table.insert(hl_infos, { name = "", icon = "", dim = content.dim })
+        table.insert(hl_infos, { name = "", icon = "", dim = content.dim , level = content.level })
       end
     end
   end
@@ -229,7 +231,12 @@ function StatusModule.redraw()
       if hl_infos[i].dim then
         hl_group = cfg.HL_CONTENT_DIM
       else
-        hl_group = cfg.HL_CONTENT
+        local HL_CONTENT = cfg.HL_CONTENT
+        if HL_CONTENT is string then
+          hl_group = HL_CONTENT
+        else
+          hl_group = HL_CONTENT[hl_infos[i].level]
+        end
       end
 
       -- Here the highlighting is done in byte indexes, so we have to correct the byte offset
@@ -245,7 +252,7 @@ function StatusModule.redraw()
       else
         title_stop_offset = -1
       end
-      api.nvim_buf_add_highlight(StatusModule.buf_nr, cfg.NS_ID, hl_group, i - 1, 0, title_start_offset - 1)
+      api.nvim_buf_add_highlight(StatusModule.buf_nr, cfg.NS_ID, hl_group, i - 1, 0, title_start_offset + 1)
       api.nvim_buf_add_highlight(StatusModule.buf_nr, cfg.NS_ID, cfg.HL_TITLE, i - 1, title_start_offset, title_stop_offset)
 
       if hl_infos[i].icon then
