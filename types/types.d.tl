@@ -1,5 +1,13 @@
 global unpack: function<T>({T}, number, number): T...
 
+global record Message
+  mandat: string
+  dim: boolean
+  title: string|nil
+  icon: string|nil
+  opt: string|nil
+end
+
 global record vim
   record o
     textwidth: integer
@@ -121,24 +129,50 @@ global record vim
   end
 
   record lsp
-    record ProgressMessage
-      name: string
-      title: string
-      message: string|nil
-      percentage: integer|nil
-      done: boolean
-      progress: boolean
+    record ClientId
     end
 
-    record util
-      get_progress_messages: function(): {ProgressMessage}
+    enum WorkDoneProgressKind
+      'begin'
+      'report'
+      'end'
     end
+
+    record WorkDoneProgress
+      kind: WorkDoneProgressKind
+      message: string
+      title: string
+      cancellable: boolean
+      percentage: integer
+    end
+
+    record HandlerCtx
+      method: string
+      client_id: ClientId
+      bufnr: BufNr
+      params: any
+    end
+
+    record ProgressParams
+      token: string|integer
+      value: WorkDoneProgress
+    end
+
+    record Client
+      id: ClientId
+      name: string
+    end
+
+    handlers: {string: function(any, any, HandlerCtx)}
+    get_client_by_id: function(ClientId): Client
   end
 
   record SplitOptions
     plain: boolean
     trimempty: boolean
   end
+
+  print: function(any)
 
   notify: function(string, integer, {any:any})
   defer_fn: function(function(), integer)

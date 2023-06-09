@@ -2,14 +2,6 @@ local api = vim.api
 local cfg = require"notifier.config"
 local displayw = vim.fn.strdisplaywidth
 
-local record Message
-  mandat: string
-  dim: boolean
-  title: string|nil
-  icon: string|nil
-  opt: string|nil
-end
-
 local type Component = {string|integer:Message}
 
 local record StatusModule
@@ -323,12 +315,12 @@ function StatusModule.clear(component: string)
   StatusModule.redraw()
 end
 
-function StatusModule.handle(msg: vim.lsp.ProgressMessage)
-  if msg.done then
-    StatusModule.pop("lsp", msg.name)
-  else
-    StatusModule.push("lsp", { mandat = msg.title, opt = msg.message, dim = true }, msg.name)
-  end
-end
+-- function StatusModule.handle(msg: vim.lsp.ProgressMessage)
+--   if msg.done then
+--     StatusModule.pop("lsp", msg.name)
+--   else
+--     StatusModule.push("lsp", { mandat = msg.title, opt = msg.message, dim = true }, msg.name)
+--   end
+-- end
 
 return StatusModule

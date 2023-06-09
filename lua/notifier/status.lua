@@ -4,14 +4,6 @@ local displayw = vim.fn.strdisplaywidth
 
 
 
-
-
-
-
-
-
-
-
 local StatusModule = {}
 
 
@@ -323,12 +315,12 @@ function StatusModule.clear(component)
    StatusModule.redraw()
 end
 
-function StatusModule.handle(msg)
-   if msg.done then
-      StatusModule.pop("lsp", msg.name)
-   else
-      StatusModule.push("lsp", { mandat = msg.title, opt = msg.message, dim = true }, msg.name)
-   end
-end
+
+
+
+
+
+
+
 
 return StatusModule

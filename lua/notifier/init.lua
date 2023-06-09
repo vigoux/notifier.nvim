@@ -81,32 +81,29 @@ return {
       end
 
       if config.has_component("lsp") then
-         if vim.fn.exists("#LspProgress") ~= 0 then
-            api.nvim_create_autocmd({ "LspProgress" }, {
-               group = config.NS_NAME,
-               pattern = "*",
-               callback = function()
-                  local new_messages = vim.lsp.util.get_progress_messages()
-                  for _, msg in ipairs(new_messages) do
-                     if not config.config.ignore_messages[msg.name] and msg.progress then
-                        status.handle(msg)
-                     end
-                  end
-               end,
-            })
-         else
-            api.nvim_create_autocmd({ "User" }, {
-               group = config.NS_NAME,
-               pattern = "LspProgressUpdate",
-               callback = function()
-                  local new_messages = vim.lsp.util.get_progress_messages()
-                  for _, msg in ipairs(new_messages) do
-                     if not config.config.ignore_messages[msg.name] and msg.progress then
-                        status.handle(msg)
-                     end
-                  end
-               end,
-            })
+         local lsp_storage = {}
+
+
+         vim.lsp.handlers["$/progress"] = function(_, params, ctx)
+            if not params then return end
+
+            local value = params.value
+
+            local client = vim.lsp.get_client_by_id(ctx.client_id)
+            if value.kind == "end" then
+               status.pop("lsp", client.name)
+               lsp_storage[params.token] = nil
+            elseif value.kind == "report" then
+               local msg = lsp_storage[params.token]
+               if not msg then error("Report without begin ?") end
+
+               msg.opt = value.message or msg.opt
+
+               status.push("lsp", msg, client.name)
+            else
+               lsp_storage[params.token] = { mandat = value.title, opt = value.message, dim = true }
+               status.push("lsp", lsp_storage[params.token], client.name)
+            end
          end
       end
 
