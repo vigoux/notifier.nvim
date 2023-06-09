@@ -81,18 +81,33 @@ return {
     end
 
     if config.has_component "lsp" then
-      api.nvim_create_autocmd({ "User" }, {
-        group = config.NS_NAME,
-        pattern = "LspProgressUpdate",
-        callback = function()
-          local new_messages = vim.lsp.util.get_progress_messages()
-          for _, msg in ipairs(new_messages) do
-            if not config.config.ignore_messages[msg.name] and msg.progress then
-              status.handle(msg)
+      if vim.fn.exists("#LspProgress") ~= 0 then
+        api.nvim_create_autocmd({ "LspProgress" }, {
+          group = config.NS_NAME,
+          pattern = "*",
+          callback = function()
+            local new_messages = vim.lsp.util.get_progress_messages()
+            for _, msg in ipairs(new_messages) do
+              if not config.config.ignore_messages[msg.name] and msg.progress then
+                status.handle(msg)
+              end
             end
           end
-        end
-      })
+        })
+      else
+        api.nvim_create_autocmd({ "User" }, {
+          group = config.NS_NAME,
+          pattern = "LspProgressUpdate",
+          callback = function()
+            local new_messages = vim.lsp.util.get_progress_messages()
+            for _, msg in ipairs(new_messages) do
+              if not config.config.ignore_messages[msg.name] and msg.progress then
+                status.handle(msg)
+              end
+            end
+          end
+        })
+      end
     end
 
     api.nvim_create_autocmd("VimResized", {

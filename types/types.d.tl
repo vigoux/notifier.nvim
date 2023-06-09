@@ -34,6 +34,7 @@ global record vim
 
 
   record fn
+    exists: function(string): integer
     strdisplaywidth: function(string): integer
     setqflist: function({QfItem}, string, {string:boolean})
     ["repeat"]: function<T>(T, integer): T

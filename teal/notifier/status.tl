@@ -51,7 +51,7 @@ function StatusModule._create_win()
     else
       border = "none"
     end
-    StatusModule.win_nr = api.nvim_open_win(StatusModule.buf_nr, false, {
+    local success, win_nr = pcall(api.nvim_open_win, StatusModule.buf_nr, false, {
       focusable = false,
       style = "minimal",
       border = border,
@@ -64,8 +64,12 @@ function StatusModule._create_win()
       col = vim.o.columns,
       zindex = cfg.config.zindex,
     })
-    if api.nvim_win_set_hl_ns then
-      api.nvim_win_set_hl_ns(StatusModule.win_nr, cfg.NS_ID)
+
+    if success then
+      StatusModule.win_nr = win_nr
+      if api.nvim_win_set_hl_ns then
+        api.nvim_win_set_hl_ns(StatusModule.win_nr, cfg.NS_ID)
+      end
     end
   end
 end
