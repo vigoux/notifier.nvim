@@ -180,10 +180,10 @@ global record vim
   tbl_contains: function<T>({T}, T): boolean
   tbl_deep_extend: function(string, ...: table): table
   tbl_islist: function({any:any}): boolean
+  tbl_values: function<K, V>({K:V}): {V}
 
   pretty_print: function(any)
 
   split: function(string, string, SplitOptions): {string}
-
   schedule: function(function())
 end

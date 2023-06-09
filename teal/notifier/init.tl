@@ -91,7 +91,7 @@ return {
 
         local client: vim.lsp.Client = vim.lsp.get_client_by_id(ctx.client_id)
         if value.kind == "end" then
-          status.pop("lsp", client.name)
+          status.pop("lsp", client.name, tostring(params.token))
           lsp_storage[params.token] = nil
         elseif value.kind == "report" then
           local msg = lsp_storage[params.token]
@@ -99,10 +99,10 @@ return {
 
           msg.opt = value.message or msg.opt
 
-          status.push("lsp", msg, client.name)
+          status.push("lsp", msg, client.name, tostring(params.token))
         else -- begin
           lsp_storage[params.token] = { mandat = value.title, opt = value.message, dim=true }
-          status.push("lsp", lsp_storage[params.token], client.name)
+          status.push("lsp", lsp_storage[params.token], client.name, tostring(params.token))
         end
       end
     end

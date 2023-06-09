@@ -2,7 +2,7 @@ local api = vim.api
 local cfg = require"notifier.config"
 local displayw = vim.fn.strdisplaywidth
 
-local type Component = {string|integer:Message}
+local type Component = {string|integer:any}
 
 local record StatusModule
   active: {string:Component}
@@ -198,20 +198,30 @@ function StatusModule.redraw()
     local msgs = StatusModule.active[compname] or {}
     local is_tbl = vim.tbl_islist(msgs)
 
-    for name, msg in pairs(msgs) do
-      -- Resolve notification name
-      local rname: string = msg.title
-      if not rname and is_tbl then
-        rname = compname
-      elseif not is_tbl then
-        rname = name as string -- This is actually a string here, as checks by tbl_islist
+    -- Now that's a lot of code duplication !
+    for name, maybemsg in pairs(msgs) do
+      local sub: {Message}
+      if (maybemsg as Message).mandat then -- this is a message alone, and not a list of messages to render
+        sub = {maybemsg as Message}
+      elseif maybemsg is {string:Message} then
+        sub = vim.tbl_values(maybemsg as {string:Message})
       end
 
-      if cfg.config.component_name_recall and not is_tbl then
-        rname = string.format("%s:%s", compname, rname)
-      end
+      for _, msg in ipairs(sub) do
+        -- Resolve notification name
+        local rname: string = msg.title
+        if not rname and is_tbl then
+          rname = compname
+        elseif not is_tbl then
+          rname = name as string -- This is actually a string here, as checks by tbl_islist
+        end
 
-      push_line(rname, msg)
+        if cfg.config.component_name_recall and not is_tbl then
+          rname = string.format("%s:%s", compname, rname)
+        end
+
+        push_line(rname, msg)
+      end
     end
   end
 
@@ -279,7 +289,7 @@ function StatusModule._ensure_valid(msg: Message): boolean
   return true
 end
 
-function StatusModule.push(component: string, content: Message|string, title: string|nil)
+function StatusModule.push(component: string, content: Message|string, title: string|nil, key: string|nil)
   if not StatusModule.active[component] then
     StatusModule.active[component] = {}
   end
@@ -291,7 +301,15 @@ function StatusModule.push(component: string, content: Message|string, title: st
   content = content as Message
   if StatusModule._ensure_valid(content) then
     if title then
-      StatusModule.active[component][title] = content
+      if key then
+        local comp = StatusModule.active[component][title]
+        if not comp is {string: Message} then
+          StatusModule.active[component][title] = {}
+        end
+        (StatusModule.active[component][title] as {string:Message})[key] = content
+      else
+        StatusModule.active[component][title] = content
+      end
     else
       table.insert(StatusModule.active[component] as {integer:Message}, content)
     end
@@ -299,11 +317,16 @@ function StatusModule.push(component: string, content: Message|string, title: st
   end
 end
 
-function StatusModule.pop(component: string, title: string|nil)
+function StatusModule.pop(component: string, title: string|nil, key: string|nil)
   if not StatusModule.active[component] then return end
 
   if title then
-    StatusModule.active[component][title] = nil
+    local comp = StatusModule.active[component][title]
+    if key and comp is {string:Message} then
+      (comp as {string:Message})[key] = nil
+    else
+      StatusModule.active[component][title] = nil
+    end
   else
     table.remove(StatusModule.active[component] as {integer:Message})
   end

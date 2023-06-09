@@ -198,20 +198,30 @@ function StatusModule.redraw()
       local msgs = StatusModule.active[compname] or {}
       local is_tbl = vim.tbl_islist(msgs)
 
-      for name, msg in pairs(msgs) do
 
-         local rname = msg.title
-         if not rname and is_tbl then
-            rname = compname
-         elseif not is_tbl then
-            rname = name
+      for name, maybemsg in pairs(msgs) do
+         local sub
+         if (maybemsg).mandat then
+            sub = { maybemsg }
+         elseif type(maybemsg) == "table" then
+            sub = vim.tbl_values(maybemsg)
          end
 
-         if cfg.config.component_name_recall and not is_tbl then
-            rname = string.format("%s:%s", compname, rname)
-         end
+         for _, msg in ipairs(sub) do
 
-         push_line(rname, msg)
+            local rname = msg.title
+            if not rname and is_tbl then
+               rname = compname
+            elseif not is_tbl then
+               rname = name
+            end
+
+            if cfg.config.component_name_recall and not is_tbl then
+               rname = string.format("%s:%s", compname, rname)
+            end
+
+            push_line(rname, msg)
+         end
       end
    end
 
@@ -279,7 +289,7 @@ function StatusModule._ensure_valid(msg)
    return true
 end
 
-function StatusModule.push(component, content, title)
+function StatusModule.push(component, content, title, key)
    if not StatusModule.active[component] then
       StatusModule.active[component] = {}
    end
@@ -291,7 +301,15 @@ function StatusModule.push(component, content, title)
    content = content
    if StatusModule._ensure_valid(content) then
       if title then
-         StatusModule.active[component][title] = content
+         if key then
+            local comp = StatusModule.active[component][title]
+            if not (type(comp) == "table") then
+               StatusModule.active[component][title] = {}
+            end
+            (StatusModule.active[component][title])[key] = content
+         else
+            StatusModule.active[component][title] = content
+         end
       else
          table.insert(StatusModule.active[component], content)
       end
@@ -299,11 +317,16 @@ function StatusModule.push(component, content, title)
    end
 end
 
-function StatusModule.pop(component, title)
+function StatusModule.pop(component, title, key)
    if not StatusModule.active[component] then return end
 
    if title then
-      StatusModule.active[component][title] = nil
+      local comp = StatusModule.active[component][title]
+      if key and type(comp) == "table" then
+         (comp)[key] = nil
+      else
+         StatusModule.active[component][title] = nil
+      end
    else
       table.remove(StatusModule.active[component])
    end
