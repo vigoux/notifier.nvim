@@ -315,12 +315,4 @@ function StatusModule.clear(component)
    StatusModule.redraw()
 end
 
-
-
-
-
-
-
-
-
 return StatusModule

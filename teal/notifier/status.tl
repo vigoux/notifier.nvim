@@ -315,12 +315,4 @@ function StatusModule.clear(component: string)
   StatusModule.redraw()
 end
 
--- function StatusModule.handle(msg: vim.lsp.ProgressMessage)
---   if msg.done then
---     StatusModule.pop("lsp", msg.name)
---   else
---     StatusModule.push("lsp", { mandat = msg.title, opt = msg.message, dim = true }, msg.name)
---   end
--- end
-
 return StatusModule
