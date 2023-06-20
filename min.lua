@@ -1,1 +1,1 @@
-vim.o.runtimepath='.,' .. vim.fn.expand "$VIMRUNTIME"
+vim.o.runtimepath = '.,' .. vim.fn.expand('$VIMRUNTIME')
