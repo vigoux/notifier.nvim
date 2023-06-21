@@ -10,16 +10,10 @@ local displayw = vim.fn.strdisplaywidth
 ---@field icon string? Optional icon of the message
 
 local M = {
+  win_nr = nil,
+  buf_nr = nil,
   active = {}
 }
-
----@type buffer?
-local bufnr = nil
-
----@type window?
-local winnr = nil
-
-M.active = {}
 
 local function get_status_width()
   local w = cfg.config.status_width
@@ -33,9 +27,9 @@ end
 --- Creates the status window if not already created
 ---@private
 local function create_win()
-  if not winnr or not api.nvim_win_is_valid(winnr) then
-    if not bufnr or not api.nvim_buf_is_valid(bufnr) then
-      bufnr = api.nvim_create_buf(false, true)
+  if not M.win_nr or not api.nvim_win_is_valid(M.win_nr) then
+    if not M.buf_nr or not api.nvim_buf_is_valid(M.buf_nr) then
+      M.buf_nr = api.nvim_create_buf(false, true)
     end
 
     ---@type string
@@ -47,7 +41,7 @@ local function create_win()
     end
 
     local success
-    success, winnr = pcall(api.nvim_open_win, bufnr, false, {
+    success, M.win_nr = pcall(api.nvim_open_win, M.buf_nr, false, {
       focusable = false,
       style = 'minimal',
       border = border,
@@ -63,7 +57,7 @@ local function create_win()
 
     if success then
       if api.nvim_win_set_hl_ns then
-        api.nvim_win_set_hl_ns(winnr, cfg.NS_ID)
+        api.nvim_win_set_hl_ns(M.win_nr, cfg.NS_ID)
       end
     end
   end
@@ -72,16 +66,16 @@ end
 --- Checks if the UI is valid, including the UI buffer
 ---@return boolean valid Whether the UI is valid
 ---@private
-local function ui_valid()
-  return winnr ~= nil and api.nvim_win_is_valid(winnr) and bufnr ~= nil and api.nvim_buf_is_valid(bufnr)
+function M._ui_valid()
+  return M.win_nr ~= nil and api.nvim_win_is_valid(M.win_nr) and M.buf_nr ~= nil and api.nvim_buf_is_valid(M.buf_nr)
 end
 
 --- Closes the status window
 local function delete_win()
-  if winnr and api.nvim_win_is_valid(winnr) then
-    api.nvim_win_close(winnr, true)
+  if M.win_nr and api.nvim_win_is_valid(M.win_nr) then
+    api.nvim_win_close(M.win_nr, true)
   end
-  winnr = nil
+  M.win_nr = nil
 end
 
 --- Pads @p src to fit in @p width
@@ -96,7 +90,7 @@ end
 local function redraw()
   create_win()
 
-  if not ui_valid() then
+  if not M._ui_valid() then
     return
   end
 
@@ -218,8 +212,8 @@ local function redraw()
   end
 
   if #lines > 0 then
-    api.nvim_buf_clear_namespace(bufnr, cfg.NS_ID, 0, -1)
-    api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+    api.nvim_buf_clear_namespace(M.buf_nr, cfg.NS_ID, 0, -1)
+    api.nvim_buf_set_lines(M.buf_nr, 0, -1, false, lines)
 
     for i = 1, #hl_infos do
       local hl_group
@@ -241,7 +235,7 @@ local function redraw()
         title_stop_offset = -1
       end
       api.nvim_buf_add_highlight(
-        bufnr,
+        M.buf_nr,
         cfg.NS_ID,
         hl_group,
         i - 1,
@@ -249,7 +243,7 @@ local function redraw()
         title_start_offset - 1
       )
       api.nvim_buf_add_highlight(
-        bufnr,
+        M.buf_nr,
         cfg.NS_ID,
         cfg.HL_TITLE,
         i - 1,
@@ -259,7 +253,7 @@ local function redraw()
 
       if hl_infos[i].icon then
         api.nvim_buf_add_highlight(
-          bufnr,
+          M.buf_nr,
           cfg.NS_ID,
           cfg.HL_ICON,
           i - 1,
@@ -269,7 +263,7 @@ local function redraw()
       end
     end
 
-    api.nvim_win_set_height(winnr, #lines)
+    api.nvim_win_set_height(M.win_nr, #lines)
   else
     delete_win()
   end

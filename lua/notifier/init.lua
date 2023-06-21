@@ -2,6 +2,8 @@ local api = vim.api
 local status = require('notifier.status')
 local config = require('notifier.config')
 
+local M = {}
+
 ---@class Notifier.NotifyMsg
 ---@field msg string The message
 ---@field level integer Message level
@@ -63,70 +65,76 @@ local commands = {
   },
 }
 
-return {
-  notify = function(msg, level, opts)
-    notify(msg, level, opts)
-  end,
-  setup = function(user_config)
-    api.nvim_create_augroup(config.NS_NAME, {
-      clear = true,
-    })
+M.notify = notify
 
-    config.update(user_config)
+--- Sets up notifier
+---@param user_config Notifier.Config User configuration
+function M.setup(user_config)
+  api.nvim_create_augroup(config.NS_NAME, {
+    clear = true,
+  })
 
-    if config.has_component('nvim') then
-      ---@diagnostic disable-next-line:duplicate-set-field
-      vim.notify = function(msg, level, opts)
-        notify(msg, level, opts)
+  config.update(user_config)
+
+  if config.has_component('nvim') then
+    ---@diagnostic disable-next-line:duplicate-set-field
+    vim.notify = function(msg, level, opts)
+      notify(msg, level, opts)
+    end
+  end
+
+  for cname, def in pairs(commands) do
+    api.nvim_create_user_command(config.NS_NAME .. cname, def.func, def.opts)
+  end
+
+  if config.has_component('lsp') then
+    ---@type {[string]: Notifier.Message}
+    local lsp_storage = {}
+
+    --- Progress handler for LSP
+    ---@param _ any
+    ---@param params any?
+    ---@param ctx any
+    ---@diagnostic disable-next-line:duplicate-set-field
+    vim.lsp.handlers['$/progress'] = function(_, params, ctx)
+      if not params then
+        return
       end
-    end
 
-    for cname, def in pairs(commands) do
-      api.nvim_create_user_command(config.NS_NAME .. cname, def.func, def.opts)
-    end
+      ---@type {kind: string, message: string, title: string}
+      local value = params.value
 
-    if config.has_component('lsp') then
-      ---@type {[string]: Notifier.Message}
-      local lsp_storage = {}
-
-      --- Progress handler for LSP
-      ---@param _ any
-      ---@param params any?
-      ---@param ctx any
-      ---@diagnostic disable-next-line:duplicate-set-field
-      vim.lsp.handlers['$/progress'] = function(_, params, ctx)
-        if not params then
-          return
+      local client = vim.lsp.get_client_by_id(ctx.client_id)
+      if value.kind == 'end' then
+        status.pop('lsp', client.name)
+        lsp_storage[params.token] = nil
+      elseif value.kind == 'report' then
+        local msg = lsp_storage[params.token]
+        if not msg then
+          error('Report without begin ?')
         end
 
-        ---@type {kind: string, message: string, title: string}
-        local value = params.value
+        msg.opt = value.message or msg.opt
 
-        local client = vim.lsp.get_client_by_id(ctx.client_id)
-        if value.kind == 'end' then
-          status.pop('lsp', client.name)
-          lsp_storage[params.token] = nil
-        elseif value.kind == 'report' then
-          local msg = lsp_storage[params.token]
-          if not msg then
-            error('Report without begin ?')
-          end
-
-          msg.opt = value.message or msg.opt
-
-          status.push('lsp', msg, client.name)
-        else
-          lsp_storage[params.token] = { mandat = value.title, opt = value.message, dim = true }
-          status.push('lsp', lsp_storage[params.token], client.name)
-        end
+        status.push('lsp', msg, client.name)
+      else
+        lsp_storage[params.token] = { mandat = value.title, opt = value.message, dim = true }
+        status.push('lsp', lsp_storage[params.token], client.name)
       end
     end
+  end
 
-    api.nvim_create_autocmd('VimResized', {
-      group = config.NS_NAME,
-      callback = function()
-        status._delete_win()
-      end,
-    })
-  end,
-}
+  api.nvim_create_autocmd('VimResized', {
+    group = config.NS_NAME,
+    callback = function()
+      status._delete_win()
+    end,
+  })
+end
+
+return M
+--   notify = function(msg, level, opts)
+--     notify(msg, level, opts)
+--   end,
+--   ---@type function(Notifier.Config)
+-- }

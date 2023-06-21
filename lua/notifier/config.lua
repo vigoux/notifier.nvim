@@ -1,6 +1,6 @@
 ---@class Notifier.NotifyCfg
 ---@field clear_time integer Time to wait before poping the notification
----@field min_level vim.log.Level Minimum log level to consider
+---@field min_level integer Minimum log level to consider
 
 ---@class Notifier.Config
 ---@field ignore_messages {string: boolean} TODO
@@ -11,47 +11,44 @@
 ---@field debug boolean
 ---@field zindex integer zindex of the UI floating window
 
----@type Notifier.Config
-local config = {
-  ignore_messages = {},
-  status_width = function()
-    local tw = vim.o.textwidth
-    local cols = vim.o.columns
-    if tw > 0 and tw < cols then
-      return math.floor((cols - tw) * 0.7)
-    else
-      return math.floor(cols / 3)
-    end
-  end,
-  components = { 'nvim', 'lsp' },
-  notify = {
-    clear_time = 5000,
-    min_level = vim.log.levels.INFO,
-  },
-  component_name_recall = false,
-  debug = false,
-  zindex = 50,
-}
-
 local M = {
-  config = config
+  ---@type Notifier.Config
+  config = {
+    ignore_messages = {},
+    status_width = function()
+      local tw = vim.o.textwidth
+      local cols = vim.o.columns
+      if tw > 0 and tw < cols then
+        return math.floor((cols - tw) * 0.7)
+      else
+        return math.floor(cols / 3)
+      end
+    end,
+    components = { 'nvim', 'lsp' },
+    notify = {
+      clear_time = 5000,
+      min_level = vim.log.levels.INFO,
+    },
+    component_name_recall = false,
+    debug = false,
+    zindex = 50,
+  }
 }
 
 M.NS_NAME = 'Notifier'
 M.NS_ID = vim.api.nvim_create_namespace('notifier')
 
-
----Updates the configuration to match @p other
+--- Updates the configuration to match @p other
 ---@param other Notifier.Config The new configuration
 function M.update(other)
-  config = vim.tbl_deep_extend('force', config, other or {})
+  config = vim.tbl_deep_extend('force', M.config, other or {})
 end
 
 --- Checks whether a component is enabled
 ---@param compname string The component name to check
 ---@return boolean enabled Whether the componenent is enabled
 function M.has_component(compname)
-  return vim.tbl_contains(config.components, compname)
+  return vim.tbl_contains(M.config.components, compname)
 end
 
 --- Creates and sets a highlight group.
