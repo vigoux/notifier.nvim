@@ -33,7 +33,9 @@ local config = {
   zindex = 50,
 }
 
-local M = {}
+local M = {
+  config = config
+}
 
 M.NS_NAME = 'Notifier'
 M.NS_ID = vim.api.nvim_create_namespace('notifier')

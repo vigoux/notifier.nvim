@@ -2,11 +2,24 @@ local api = vim.api
 local cfg = require('notifier.config')
 local displayw = vim.fn.strdisplaywidth
 
-local StatusModule = {}
+---@class Notifier.Message
+---@field mandat string Mandatory part of the message
+---@field opt string? Optional part of the message
+---@field dim boolean Whether to dim the message
+---@field title string? Optional title for the message
+---@field icon string? Optional icon of the message
 
-StatusModule.buf_nr = nil
-StatusModule.win_nr = nil
-StatusModule.active = {}
+local M = {
+  active = {}
+}
+
+---@type buffer?
+local bufnr = nil
+
+---@type window?
+local winnr = nil
+
+M.active = {}
 
 local function get_status_width()
   local w = cfg.config.status_width
@@ -17,18 +30,24 @@ local function get_status_width()
   end
 end
 
-function StatusModule._create_win()
-  if not StatusModule.win_nr or not api.nvim_win_is_valid(StatusModule.win_nr) then
-    if not StatusModule.buf_nr or not api.nvim_buf_is_valid(StatusModule.buf_nr) then
-      StatusModule.buf_nr = api.nvim_create_buf(false, true)
+--- Creates the status window if not already created
+---@private
+local function create_win()
+  if not winnr or not api.nvim_win_is_valid(winnr) then
+    if not bufnr or not api.nvim_buf_is_valid(bufnr) then
+      bufnr = api.nvim_create_buf(false, true)
     end
+
+    ---@type string
     local border
     if cfg.config.debug then
       border = 'single'
     else
       border = 'none'
     end
-    local success, win_nr = pcall(api.nvim_open_win, StatusModule.buf_nr, false, {
+
+    local success
+    success, winnr = pcall(api.nvim_open_win, bufnr, false, {
       focusable = false,
       style = 'minimal',
       border = border,
@@ -43,36 +62,41 @@ function StatusModule._create_win()
     })
 
     if success then
-      StatusModule.win_nr = win_nr
       if api.nvim_win_set_hl_ns then
-        api.nvim_win_set_hl_ns(StatusModule.win_nr, cfg.NS_ID)
+        api.nvim_win_set_hl_ns(winnr, cfg.NS_ID)
       end
     end
   end
 end
 
-function StatusModule._ui_valid()
-  return StatusModule.win_nr
-    and api.nvim_win_is_valid(StatusModule.win_nr)
-    and StatusModule.buf_nr
-    and api.nvim_buf_is_valid(StatusModule.buf_nr)
+--- Checks if the UI is valid, including the UI buffer
+---@return boolean valid Whether the UI is valid
+---@private
+local function ui_valid()
+  return winnr ~= nil and api.nvim_win_is_valid(winnr) and bufnr ~= nil and api.nvim_buf_is_valid(bufnr)
 end
 
-function StatusModule._delete_win()
-  if StatusModule.win_nr and api.nvim_win_is_valid(StatusModule.win_nr) then
-    api.nvim_win_close(StatusModule.win_nr, true)
+--- Closes the status window
+local function delete_win()
+  if winnr and api.nvim_win_is_valid(winnr) then
+    api.nvim_win_close(winnr, true)
   end
-  StatusModule.win_nr = nil
+  winnr = nil
 end
 
+--- Pads @p src to fit in @p width
+---@param src string The string to pad
+---@param width integer Width to fit
+---@return string padded The argument padded with spaces to fit in width
 local function adjust_width(src, width)
   return vim.fn['repeat'](' ', width - displayw(src)) .. src
 end
 
-function StatusModule.redraw()
-  StatusModule._create_win()
+--- Redraws the notifier UI
+local function redraw()
+  create_win()
 
-  if not StatusModule._ui_valid() then
+  if not ui_valid() then
     return
   end
 
@@ -92,14 +116,18 @@ function StatusModule.redraw()
       vim.pretty_print(message_lines)
     end
 
+    ---@type string[]
     local tmp_lines = {}
+
     local maxlen = 0
 
     for _, line in ipairs(message_lines) do
+      ---@type string
       local tmp_line
       local words = vim.split(line, '%s', { trimempty = true })
 
       for _, w in ipairs(words) do
+        ---@type string
         local tmp
         if not tmp_line then
           tmp = w
@@ -127,8 +155,10 @@ function StatusModule.redraw()
     end
 
     for i, line in ipairs(message_lines) do
+      ---@type integer
       local right_pad_len = maxlen - displayw(line)
 
+      ---@type string
       local fmt_msg
       if content.opt and i == #message_lines then
         local tmp = string.format('%s (%s)', line, content.opt)
@@ -141,6 +171,7 @@ function StatusModule.redraw()
         fmt_msg = adjust_width(line, inner_width - right_pad_len)
       end
 
+      ---@type string
       local formatted
       if i == 1 then
         local right_pad = vim.fn['repeat'](' ', right_pad_len)
@@ -167,7 +198,7 @@ function StatusModule.redraw()
   end
 
   for _, compname in ipairs(cfg.config.components) do
-    local msgs = StatusModule.active[compname] or {}
+    local msgs = M.active[compname] or {}
     local is_tbl = vim.tbl_islist(msgs)
 
     for name, msg in pairs(msgs) do
@@ -187,8 +218,8 @@ function StatusModule.redraw()
   end
 
   if #lines > 0 then
-    api.nvim_buf_clear_namespace(StatusModule.buf_nr, cfg.NS_ID, 0, -1)
-    api.nvim_buf_set_lines(StatusModule.buf_nr, 0, -1, false, lines)
+    api.nvim_buf_clear_namespace(bufnr, cfg.NS_ID, 0, -1)
+    api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
 
     for i = 1, #hl_infos do
       local hl_group
@@ -210,7 +241,7 @@ function StatusModule.redraw()
         title_stop_offset = -1
       end
       api.nvim_buf_add_highlight(
-        StatusModule.buf_nr,
+        bufnr,
         cfg.NS_ID,
         hl_group,
         i - 1,
@@ -218,7 +249,7 @@ function StatusModule.redraw()
         title_start_offset - 1
       )
       api.nvim_buf_add_highlight(
-        StatusModule.buf_nr,
+        bufnr,
         cfg.NS_ID,
         cfg.HL_TITLE,
         i - 1,
@@ -228,7 +259,7 @@ function StatusModule.redraw()
 
       if hl_infos[i].icon then
         api.nvim_buf_add_highlight(
-          StatusModule.buf_nr,
+          bufnr,
           cfg.NS_ID,
           cfg.HL_ICON,
           i - 1,
@@ -238,13 +269,13 @@ function StatusModule.redraw()
       end
     end
 
-    api.nvim_win_set_height(StatusModule.win_nr, #lines)
+    api.nvim_win_set_height(winnr, #lines)
   else
-    StatusModule._delete_win()
+    delete_win()
   end
 end
 
-function StatusModule._ensure_valid(msg)
+function M._ensure_valid(msg)
   if msg.icon and displayw(msg.icon) == 0 then
     msg.icon = nil
   end
@@ -268,9 +299,13 @@ function StatusModule._ensure_valid(msg)
   return true
 end
 
-function StatusModule.push(component, content, title)
-  if not StatusModule.active[component] then
-    StatusModule.active[component] = {}
+--- Push a new content into a given component
+---@param component string Component to put the message int
+---@param content string|Notifier.Message Message to display
+---@param title string? Subcomponent title
+function M.push(component, content, title)
+  if not M.active[component] then
+    M.active[component] = {}
   end
 
   if type(content) == 'string' then
@@ -278,32 +313,32 @@ function StatusModule.push(component, content, title)
   end
 
   content = content
-  if StatusModule._ensure_valid(content) then
+  if M._ensure_valid(content) then
     if title then
-      StatusModule.active[component][title] = content
+      M.active[component][title] = content
     else
-      table.insert(StatusModule.active[component], content)
+      table.insert(M.active[component], content)
     end
-    StatusModule.redraw()
+    redraw()
   end
 end
 
-function StatusModule.pop(component, title)
-  if not StatusModule.active[component] then
+function M.pop(component, title)
+  if not M.active[component] then
     return
   end
 
   if title then
-    StatusModule.active[component][title] = nil
+    M.active[component][title] = nil
   else
-    table.remove(StatusModule.active[component])
+    table.remove(M.active[component])
   end
-  StatusModule.redraw()
+  redraw()
 end
 
-function StatusModule.clear(component)
-  StatusModule.active[component] = nil
-  StatusModule.redraw()
+function M.clear(component)
+  M.active[component] = nil
+  redraw()
 end
 
-return StatusModule
+return M

@@ -2,8 +2,19 @@ local api = vim.api
 local status = require('notifier.status')
 local config = require('notifier.config')
 
+---@class Notifier.NotifyMsg
+---@field msg string The message
+---@field level integer Message level
+---@field opts {[string]: any} Options for the notification
+
+---@type Notifier.NotifyMsg[]
 local notify_msg_cache = {}
 
+--- Reimplementation of vim.notify
+---@param msg string Message
+---@param level integer Level (see vim.log.Level)
+---@param opts {[string]:any}? Options
+---@param no_cache boolean? Whether to add the current notification in the cache
 local function notify(msg, level, opts, no_cache)
   level = level or vim.log.levels.INFO
   opts = opts or {}
@@ -34,6 +45,7 @@ local commands = {
     },
     func = function(args)
       if args.bang then
+        ---@type any[]
         local list = {}
         for _, msg in ipairs(notify_msg_cache) do
           list[#list + 1] = {
@@ -63,6 +75,7 @@ return {
     config.update(user_config)
 
     if config.has_component('nvim') then
+      ---@diagnostic disable-next-line:duplicate-set-field
       vim.notify = function(msg, level, opts)
         notify(msg, level, opts)
       end
@@ -73,13 +86,20 @@ return {
     end
 
     if config.has_component('lsp') then
+      ---@type {[string]: Notifier.Message}
       local lsp_storage = {}
 
+      --- Progress handler for LSP
+      ---@param _ any
+      ---@param params any?
+      ---@param ctx any
+      ---@diagnostic disable-next-line:duplicate-set-field
       vim.lsp.handlers['$/progress'] = function(_, params, ctx)
         if not params then
           return
         end
 
+        ---@type {kind: string, message: string, title: string}
         local value = params.value
 
         local client = vim.lsp.get_client_by_id(ctx.client_id)
