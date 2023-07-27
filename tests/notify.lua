@@ -1,6 +1,5 @@
 local notifier = require('notifier')
 local status = require('notifier.status')
-require('busted.runner')({ output = 'TAP', shuffle = true })
 
 local function assert_no_status()
   assert.Falsy(status._ui_valid())

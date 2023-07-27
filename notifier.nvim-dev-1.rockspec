@@ -5,8 +5,8 @@ source = {
 }
 description = {
    detailed = "![Showcase](https://user-images.githubusercontent.com/39092278/186714682-f51ea665-6fca-4442-bad8-8cc7fda2f138.gif)",
-   homepage = "*** please enter a project homepage ***",
-   license = "*** please specify a license ***"
+   homepage = "www.github.com/vigoux/notifier.nvim",
+   license = "BSD 3-Clause"
 }
 build = {
    type = "builtin",
