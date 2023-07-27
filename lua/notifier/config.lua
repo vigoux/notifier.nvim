@@ -4,7 +4,7 @@
 
 ---@class Notifier.Config
 ---@field ignore_messages {string: boolean} TODO
----@field status_width (integer|function(): integer) Width or function to compute width
+---@field status_width (integer|fun(): integer) Width or function to compute width
 ---@field components string[] Components to activate
 ---@field notify Notifier.NotifyCfg Configuration for the notify component
 ---@field component_name_recall boolean Whether to recall the component name in the notifier UI
@@ -41,7 +41,7 @@ M.NS_ID = vim.api.nvim_create_namespace('notifier')
 --- Updates the configuration to match @p other
 ---@param other Notifier.Config The new configuration
 function M.update(other)
-  config = vim.tbl_deep_extend('force', M.config, other or {})
+  M.config = vim.tbl_deep_extend('force', M.config, other or {})
 end
 
 --- Checks whether a component is enabled

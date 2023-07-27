@@ -67,7 +67,7 @@ end
 ---@return boolean valid Whether the UI is valid
 ---@private
 function M._ui_valid()
-  return M.win_nr ~= nil and api.nvim_win_is_valid(M.win_nr) and M.buf_nr ~= nil and api.nvim_buf_is_valid(M.buf_nr)
+  return M.win_nr and api.nvim_win_is_valid(M.win_nr) and M.buf_nr and api.nvim_buf_is_valid(M.buf_nr)
 end
 
 --- Closes the status window

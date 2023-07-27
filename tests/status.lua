@@ -11,10 +11,10 @@ local function assert_status(lines)
   assert.are.Same(get_status_lines(), lines)
 end
 
-notifier.setup({
+notifier.setup {
   components = { 'test' },
   status_width = 40,
-})
+}
 
 describe('status window', function()
   after_each(function()
