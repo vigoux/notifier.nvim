@@ -19,4 +19,5 @@ jobs:
 
     - name: Run tests
       run: |
+        luarocks init
         ./run_tests_busted.sh tests/notify.lua tests/status.lua
