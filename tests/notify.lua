@@ -1,3 +1,7 @@
+#!/usr/bin/env -S nvim --clean -u ./min.lua -l
+
+require 'busted.runner'()
+
 local notifier = require('notifier')
 local status = require('notifier.status')
 

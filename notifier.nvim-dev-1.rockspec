@@ -1,4 +1,6 @@
 package = "notifier.nvim"
+rockspec_format = "3.0"
+
 version = "dev-1"
 source = {
    url = "git+ssh://git@github.com/vigoux/notifier.nvim.git"
@@ -18,4 +20,11 @@ build = {
    copy_directories = {
       "tests"
    }
+}
+test_dependencies = {
+  "busted >= 2.1.2"
+}
+test = {
+  type = "command",
+  command = "find tests -type f -exec './{}' ';'"
 }
