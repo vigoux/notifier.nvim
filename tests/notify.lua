@@ -1,6 +1,9 @@
-local notifier = require 'notifier'
-local status = require 'notifier.status'
-require 'busted.runner' { output = 'TAP', shuffle = true }
+#!/usr/bin/env -S nvim --clean -u ./min.lua -l
+
+require 'busted.runner'()
+
+local notifier = require('notifier')
+local status = require('notifier.status')
 
 local function assert_no_status()
   assert.Falsy(status._ui_valid())
@@ -15,44 +18,42 @@ local function assert_status(lines)
   assert.are.Same(get_status_lines(), lines)
 end
 
-notifier.setup {
-  components = { "nvim" },
+notifier.setup({
+  components = { 'nvim' },
   notify = {
     min_level = vim.log.levels.INFO,
   },
-  status_width = 40
-}
+  status_width = 40,
+})
 
 describe('notify', function()
-
   after_each(function()
-    status.clear "nvim"
+    status.clear('nvim')
   end)
 
   it('works', function()
-    vim.notify "test"
-    assert_status {
-      '                               test nvim'
-    }
+    vim.notify('test')
+    assert_status({
+      '                               test nvim',
+    })
   end)
 
   it('min_level is respected (level == min_level)', function()
-    vim.notify("test INFO", vim.log.levels.INFO)
-    assert_status {
-      '                          test INFO nvim'
-    }
+    vim.notify('test INFO', vim.log.levels.INFO)
+    assert_status({
+      '                          test INFO nvim',
+    })
   end)
 
   it('min_level is respected (level < min_level)', function()
-    vim.notify("test DEBUG", vim.log.levels.DEBUG)
+    vim.notify('test DEBUG', vim.log.levels.DEBUG)
     assert_no_status()
   end)
 
   it('min_level is respected (level > min_level)', function()
-    vim.notify("test WARN", vim.log.levels.WARN)
-    assert_status {
-      '                          test WARN nvim'
-    }
+    vim.notify('test WARN', vim.log.levels.WARN)
+    assert_status({
+      '                          test WARN nvim',
+    })
   end)
-
 end)
