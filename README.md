@@ -20,7 +20,7 @@ The default configuration is:
 ```lua
 {
   ignore_messages = {}, -- Ignore message from LSP servers with this name
-  status_width = something, -- COmputed using 'columns' and 'textwidth'
+  status_width = something, -- Computed using 'columns' and 'textwidth'
   components = {  -- Order of the components to draw from top to bottom (first nvim notifications, then lsp)
     "nvim",  -- Nvim notifications (vim.notify and such)
     "lsp"  -- LSP status updates
