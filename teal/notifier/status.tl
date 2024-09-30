@@ -196,7 +196,7 @@ function StatusModule.redraw()
   -- For each component, print the messages
   for _, compname in ipairs(cfg.config.components) do
     local msgs = StatusModule.active[compname] or {}
-    local is_tbl = vim.tbl_islist(msgs)
+    local is_tbl = vim.islist(msgs)
 
     for name, msg in pairs(msgs) do
       -- Resolve notification name
